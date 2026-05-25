@@ -20,8 +20,9 @@ import {
 } from "@/components/ui/table";
 import { useStore, deleteRecord, type RecordType } from "@/lib/mock-store";
 import { openIpfsFile, downloadFromIPFS, isRealCid } from "@/services/ipfsService";
+import { getKey, hasKey } from "@/services/encryptionService";
 import { useMemo, useState } from "react";
-import { Download, Eye, ExternalLink, Search, Trash2 } from "lucide-react";
+import { Download, Eye, ExternalLink, Search, Trash2, Key, Copy } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -34,6 +35,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/patient/records")({
   head: () => ({ meta: [{ title: "My Records — MedChain" }] }),
@@ -55,6 +63,7 @@ function RecordsPage() {
   const [q, setQ] = useState("");
   const [type, setType] = useState<RecordType | "All">("All");
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [keyDialogRecord, setKeyDialogRecord] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -149,6 +158,18 @@ function RecordsPage() {
                         </Link>
                       </Button>
 
+                      {/* Show AES key */}
+                      {r.isEncrypted && hasKey(r.id) && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Show decryption key"
+                          onClick={() => setKeyDialogRecord({ id: r.id, name: r.name })}
+                        >
+                          <Key className="h-4 w-4 text-accent" />
+                        </Button>
+                      )}
+
                       {/* Open in IPFS */}
                       {isRealCid(r.ipfsCid ?? "") && (
                         <Button
@@ -221,6 +242,40 @@ function RecordsPage() {
           </Table>
         </div>
       </Card>
+
+      {/* AES Key Dialog */}
+      <Dialog open={!!keyDialogRecord} onOpenChange={(o) => !o && setKeyDialogRecord(null)}>
+        <DialogContent className="sm:max-w-md glass border border-border/60">
+          <DialogHeader>
+            <DialogTitle>Decryption Key</DialogTitle>
+            <DialogDescription>
+              Share this key with the doctor so they can decrypt: <strong>{keyDialogRecord?.name}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="rounded-lg bg-secondary/40 p-3 font-mono text-xs break-all select-all border border-border">
+              {keyDialogRecord ? getKey(keyDialogRecord.id) : ""}
+            </div>
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={() => {
+                const key = keyDialogRecord ? getKey(keyDialogRecord.id) : "";
+                if (key) {
+                  navigator.clipboard.writeText(key);
+                  toast.success("Key copied to clipboard");
+                }
+              }}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              Copy Key
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Give this key to the doctor. They paste it in the Decrypt dialog.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
