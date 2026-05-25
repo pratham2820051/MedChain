@@ -4,7 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   useStore,
   grantAccess as mockGrant,
@@ -35,7 +42,10 @@ function AccessPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addr || !expiry) { toast.error("Doctor address and expiry required."); return; }
+    if (!addr || !expiry) {
+      toast.error("Doctor address and expiry required.");
+      return;
+    }
     if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) {
       toast.error("Please enter a valid doctor wallet address (0x followed by 40 hex characters).");
       return;
@@ -143,14 +153,14 @@ function AccessPage() {
               <TableBody>
                 {grants.map((g) => (
                   <TableRow key={g.id}>
-                    <TableCell className="font-mono text-xs">{shortAddr(g.doctorAddress)}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {shortAddr(g.doctorAddress)}
+                    </TableCell>
                     <TableCell>{g.expiryDate}</TableCell>
                     <TableCell>
                       <span
                         className={`text-xs rounded-full px-2 py-0.5 ${
-                          g.status === "Active"
-                            ? "bg-accent/30"
-                            : "bg-muted text-muted-foreground"
+                          g.status === "Active" ? "bg-accent/30" : "bg-muted text-muted-foreground"
                         }`}
                       >
                         {g.status}

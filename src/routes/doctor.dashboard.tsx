@@ -19,24 +19,50 @@ function DoctorDashboard() {
     <div>
       <PageHeader title="Doctor Dashboard" description="Patient data shared with you." />
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard label="Patients" value={grants.length} icon={<Users className="h-5 w-5" />} accent="primary" />
-        <StatsCard label="Pending Requests" value={requests.filter((r) => r.status === "Pending").length} icon={<Clock className="h-5 w-5" />} accent="chart-3" />
-        <StatsCard label="Available Records" value={records.length} icon={<FileText className="h-5 w-5" />} accent="accent" />
-        <StatsCard label="Recent Activity" value={audit.length} icon={<Activity className="h-5 w-5" />} accent="chart-5" />
+        <StatsCard
+          label="Patients"
+          value={grants.length}
+          icon={<Users className="h-5 w-5" />}
+          accent="primary"
+        />
+        <StatsCard
+          label="Pending Requests"
+          value={requests.filter((r) => r.status === "Pending").length}
+          icon={<Clock className="h-5 w-5" />}
+          accent="chart-3"
+        />
+        <StatsCard
+          label="Available Records"
+          value={records.length}
+          icon={<FileText className="h-5 w-5" />}
+          accent="accent"
+        />
+        <StatsCard
+          label="Recent Activity"
+          value={audit.length}
+          icon={<Activity className="h-5 w-5" />}
+          accent="chart-5"
+        />
       </div>
       <Card className="glass p-5 mt-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">Recent Activity</h2>
-          <Link to="/doctor/records" className="text-sm text-primary hover:underline">View records</Link>
+          <Link to="/doctor/records" className="text-sm text-primary hover:underline">
+            View records
+          </Link>
         </div>
         <ul className="divide-y divide-border/40">
           {audit.slice(0, 6).map((a) => (
             <li key={a.id} className="py-3 flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">{a.eventType}</div>
-                <div className="text-xs text-muted-foreground font-mono">{shortAddr(a.walletAddress)}</div>
+                <div className="text-xs text-muted-foreground font-mono">
+                  {shortAddr(a.walletAddress)}
+                </div>
               </div>
-              <span className="text-xs text-muted-foreground">{new Date(a.timestamp).toLocaleString()}</span>
+              <span className="text-xs text-muted-foreground">
+                {new Date(a.timestamp).toLocaleString()}
+              </span>
             </li>
           ))}
           {audit.length === 0 && (

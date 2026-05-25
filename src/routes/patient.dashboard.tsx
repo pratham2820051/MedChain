@@ -114,7 +114,9 @@ function Dashboard() {
         />
         <StatsCard
           label="Recent Uploads"
-          value={records.filter((r) => new Date(r.uploadDate) > new Date(Date.now() - 30 * 864e5)).length}
+          value={
+            records.filter((r) => new Date(r.uploadDate) > new Date(Date.now() - 30 * 864e5)).length
+          }
           icon={<Upload className="h-5 w-5" />}
           accent="chart-3"
         />

@@ -4,13 +4,24 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { uploadRecord as mockUpload, type RecordType } from "@/lib/mock-store";
 import { uploadRecord as chainUpload, parseContractError } from "@/services/medchainService";
-import { uploadToIPFS, validateFile, ALLOWED_EXTENSIONS, MAX_FILE_SIZE_BYTES } from "@/services/ipfsService";
+import {
+  uploadToIPFS,
+  validateFile,
+  ALLOWED_EXTENSIONS,
+  MAX_FILE_SIZE_BYTES,
+} from "@/services/ipfsService";
 import { encryptMedicalFile } from "@/services/encryptionService";
 import { useWallet } from "@/hooks/useWallet";
 import { toast } from "sonner";
@@ -61,7 +72,10 @@ function UploadPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !name) { toast.error("Please provide a name and file."); return; }
+    if (!file || !name) {
+      toast.error("Please provide a name and file.");
+      return;
+    }
 
     setBusy(true);
     setProgress(0);
@@ -149,7 +163,6 @@ function UploadPage() {
       />
       <Card className="glass p-6">
         <form onSubmit={submit} className="space-y-5">
-
           {/* Encryption badge */}
           <div className="flex items-center gap-2 rounded-xl bg-accent/10 border border-accent/30 px-3 py-2 text-xs text-accent-foreground">
             <ShieldCheck className="h-4 w-4 text-accent shrink-0" />
@@ -159,12 +172,16 @@ function UploadPage() {
           {/* File drop zone */}
           <div>
             <Label>Medical File</Label>
-            <label className={`mt-1 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 cursor-pointer transition ${file ? "border-primary bg-primary/5" : "border-border bg-secondary/30 hover:bg-secondary/50"}`}>
+            <label
+              className={`mt-1 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 cursor-pointer transition ${file ? "border-primary bg-primary/5" : "border-border bg-secondary/30 hover:bg-secondary/50"}`}
+            >
               {file ? (
                 <>
                   <FileCheck2 className="h-7 w-7 text-primary" />
                   <span className="text-sm font-medium text-primary">{file.name}</span>
-                  <span className="text-xs text-muted-foreground">{fileSizeMB} MB · Click to change</span>
+                  <span className="text-xs text-muted-foreground">
+                    {fileSizeMB} MB · Click to change
+                  </span>
                 </>
               ) : (
                 <>
@@ -187,15 +204,29 @@ function UploadPage() {
           {/* Record name */}
           <div>
             <Label htmlFor="name">Record Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Annual Blood Panel" required />
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Annual Blood Panel"
+              required
+            />
           </div>
 
           {/* Record type */}
           <div>
             <Label>Record Type</Label>
             <Select value={type} onValueChange={(v) => setType(v as RecordType)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{types.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {types.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
 
@@ -208,13 +239,19 @@ function UploadPage() {
           {/* Network status */}
           <div className="space-y-1">
             {isConnected && isCorrectNetwork && (
-              <p className="text-xs text-muted-foreground">✅ MetaMask on Sepolia — CID will be saved on-chain.</p>
+              <p className="text-xs text-muted-foreground">
+                ✅ MetaMask on Sepolia — CID will be saved on-chain.
+              </p>
             )}
             {isConnected && !isCorrectNetwork && (
-              <p className="text-xs text-yellow-600 dark:text-yellow-400">⚠️ Wrong network — switch to Sepolia.</p>
+              <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                ⚠️ Wrong network — switch to Sepolia.
+              </p>
             )}
             {!isConnected && (
-              <p className="text-xs text-muted-foreground">Connect MetaMask on Sepolia to save CID on-chain.</p>
+              <p className="text-xs text-muted-foreground">
+                Connect MetaMask on Sepolia to save CID on-chain.
+              </p>
             )}
           </div>
 
@@ -231,7 +268,9 @@ function UploadPage() {
             <div className="rounded-xl border border-accent/40 bg-accent/10 p-3 flex items-start gap-2 text-xs">
               <Link2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
               <div>
-                <div className="font-medium text-accent-foreground">Encrypted file pinned to IPFS</div>
+                <div className="font-medium text-accent-foreground">
+                  Encrypted file pinned to IPFS
+                </div>
                 <div className="font-mono text-muted-foreground break-all mt-0.5">{cid}</div>
               </div>
             </div>
@@ -239,12 +278,20 @@ function UploadPage() {
 
           {/* Actions */}
           <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => navigate({ to: "/patient/dashboard" })} disabled={busy}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate({ to: "/patient/dashboard" })}
+              disabled={busy}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={busy} className="bg-hero text-primary-foreground">
               {busy ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{STEP_LABELS[step] || "Uploading…"}</>
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {STEP_LABELS[step] || "Uploading…"}
+                </>
               ) : (
                 "Encrypt & Upload"
               )}

@@ -61,7 +61,7 @@ export function decryptFile(encryptedData: string, aesKey: string): Uint8Array {
 export function decryptToBlob(
   encryptedData: string,
   aesKey: string,
-  mimeType = "application/octet-stream"
+  mimeType = "application/octet-stream",
 ): Blob {
   const bytes = decryptFile(encryptedData, aesKey);
   return new Blob([bytes.buffer as ArrayBuffer], { type: mimeType });

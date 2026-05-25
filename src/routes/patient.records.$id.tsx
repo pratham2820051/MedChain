@@ -5,10 +5,27 @@ import { Button } from "@/components/ui/button";
 import { useStore, grantAccess, shortAddr } from "@/lib/mock-store";
 import { isRealCid, buildGatewayUrl } from "@/services/ipfsService";
 import { decryptFromIPFS, hasKey, getKey } from "@/services/encryptionService";
-import { Download, Share2, History, FileText, Loader2, ExternalLink, Link2, ShieldCheck, ShieldOff, Eye } from "lucide-react";
+import {
+  Download,
+  Share2,
+  History,
+  FileText,
+  Loader2,
+  ExternalLink,
+  Link2,
+  ShieldCheck,
+  ShieldOff,
+  Eye,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +40,7 @@ function RecordDetail() {
   const { id } = useParams({ from: "/patient/records/$id" });
   const record = useStore((s) => s.records.find((r) => r.id === id));
   const audit = useStore((s) =>
-    s.audit.filter((a) => a.eventType === "View" || a.eventType === "Download").slice(0, 6)
+    s.audit.filter((a) => a.eventType === "View" || a.eventType === "Download").slice(0, 6),
   );
 
   const [open, setOpen] = useState(false);
@@ -36,7 +53,10 @@ function RecordDetail() {
 
   const handleShare = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!docAddr || !expiry) { toast.error("Doctor address and expiry required."); return; }
+    if (!docAddr || !expiry) {
+      toast.error("Doctor address and expiry required.");
+      return;
+    }
     if (!/^0x[a-fA-F0-9]{40}$/.test(docAddr)) {
       toast.error("Please enter a valid doctor wallet address.");
       return;
@@ -76,7 +96,7 @@ function RecordDetail() {
         record.ipfsCid,
         record.id,
         record.fileName ?? record.name,
-        gatewayUrl
+        gatewayUrl,
       );
       setPreviewUrl(objectUrl);
       setPreviewMime(mimeType);
@@ -97,7 +117,12 @@ function RecordDetail() {
     try {
       const gatewayUrl = record.ipfsGatewayUrl || buildGatewayUrl(record.ipfsCid);
       const { blob } = record.isEncrypted
-        ? await decryptFromIPFS(record.ipfsCid, record.id, record.fileName ?? record.name, gatewayUrl)
+        ? await decryptFromIPFS(
+            record.ipfsCid,
+            record.id,
+            record.fileName ?? record.name,
+            gatewayUrl,
+          )
         : { blob: await fetch(gatewayUrl).then((r) => r.blob()) };
 
       const url = URL.createObjectURL(blob);
@@ -120,7 +145,9 @@ function RecordDetail() {
     return (
       <div>
         <PageHeader title="Record not found" />
-        <Button asChild variant="outline"><Link to="/patient/records">Back to records</Link></Button>
+        <Button asChild variant="outline">
+          <Link to="/patient/records">Back to records</Link>
+        </Button>
       </div>
     );
   }
@@ -137,15 +164,17 @@ function RecordDetail() {
           <div className="flex gap-2 flex-wrap">
             {/* View / Decrypt */}
             {hasCid && (
-              <Button
-                variant="outline"
-                onClick={handleDecryptAndView}
-                disabled={decrypting}
-              >
+              <Button variant="outline" onClick={handleDecryptAndView} disabled={decrypting}>
                 {decrypting ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Decrypting…</>
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Decrypting…
+                  </>
                 ) : (
-                  <><Eye className="h-4 w-4 mr-2" />View File</>
+                  <>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View File
+                  </>
                 )}
               </Button>
             )}
@@ -153,7 +182,8 @@ function RecordDetail() {
             {/* Download */}
             {hasCid && (
               <Button variant="outline" onClick={handleDecryptAndDownload} disabled={decrypting}>
-                <Download className="h-4 w-4 mr-2" />Download
+                <Download className="h-4 w-4 mr-2" />
+                Download
               </Button>
             )}
 
@@ -161,7 +191,8 @@ function RecordDetail() {
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-hero text-primary-foreground">
-                  <Share2 className="h-4 w-4 mr-2" />Share
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px] glass border border-border/60">
@@ -174,11 +205,24 @@ function RecordDetail() {
                 <form onSubmit={handleShare} className="space-y-4 py-2">
                   <div className="space-y-1">
                     <Label htmlFor="doc-addr">Doctor Wallet Address</Label>
-                    <Input id="doc-addr" placeholder="0x..." value={docAddr} onChange={(e) => setDocAddr(e.target.value)} className="font-mono text-sm" required />
+                    <Input
+                      id="doc-addr"
+                      placeholder="0x..."
+                      value={docAddr}
+                      onChange={(e) => setDocAddr(e.target.value)}
+                      className="font-mono text-sm"
+                      required
+                    />
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="expiry">Expiry Date</Label>
-                    <Input id="expiry" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} required />
+                    <Input
+                      id="expiry"
+                      type="date"
+                      value={expiry}
+                      onChange={(e) => setExpiry(e.target.value)}
+                      required
+                    />
                   </div>
                   {/* Show AES key for doctor to use */}
                   {record.isEncrypted && keyAvailable && (
@@ -187,13 +231,28 @@ function RecordDetail() {
                       <div className="rounded-lg bg-secondary/40 p-2 font-mono text-xs break-all select-all">
                         {getKey(record.id)}
                       </div>
-                      <p className="text-xs text-muted-foreground">Doctor needs this key to decrypt the file.</p>
+                      <p className="text-xs text-muted-foreground">
+                        Doctor needs this key to decrypt the file.
+                      </p>
                     </div>
                   )}
                   <DialogFooter className="pt-4">
-                    <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button type="submit" disabled={sharing} className="bg-hero text-primary-foreground">
-                      {sharing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sharing...</> : "Grant Access"}
+                    <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={sharing}
+                      className="bg-hero text-primary-foreground"
+                    >
+                      {sharing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sharing...
+                        </>
+                      ) : (
+                        "Grant Access"
+                      )}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -214,7 +273,9 @@ function RecordDetail() {
             <Info label="Upload Date" value={record.uploadDate} />
             <Info label="Status" value={record.status} />
             <Info label="File" value={record.fileName ?? "—"} />
-            <div className="sm:col-span-2"><Info label="Description" value={record.description ?? "—"} /></div>
+            <div className="sm:col-span-2">
+              <Info label="Description" value={record.description ?? "—"} />
+            </div>
           </div>
         </div>
 
@@ -224,9 +285,13 @@ function RecordDetail() {
             <>
               <ShieldCheck className="h-4 w-4 text-accent" />
               <span className="text-accent-foreground font-medium">AES-256 Encrypted</span>
-              {keyAvailable
-                ? <span className="text-muted-foreground">· Decryption key available on this device</span>
-                : <span className="text-destructive">· Key not found on this device</span>}
+              {keyAvailable ? (
+                <span className="text-muted-foreground">
+                  · Decryption key available on this device
+                </span>
+              ) : (
+                <span className="text-destructive">· Key not found on this device</span>
+              )}
             </>
           ) : (
             <>
@@ -247,8 +312,12 @@ function RecordDetail() {
               <div className="text-xs text-muted-foreground uppercase tracking-wide">CID</div>
               <div className="font-mono text-xs break-all">{record.ipfsCid}</div>
               {record.ipfsGatewayUrl && (
-                <a href={record.ipfsGatewayUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
+                <a
+                  href={record.ipfsGatewayUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+                >
                   <ExternalLink className="h-3 w-3" />
                   View raw encrypted file on IPFS
                 </a>
@@ -263,16 +332,33 @@ function RecordDetail() {
         <Card className="glass p-4 mt-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-sm">Decrypted Preview</h2>
-            <Button size="sm" variant="ghost" onClick={() => { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                URL.revokeObjectURL(previewUrl);
+                setPreviewUrl(null);
+              }}
+            >
               Close
             </Button>
           </div>
           {previewMime === "application/pdf" ? (
-            <iframe src={previewUrl} className="w-full h-[600px] rounded-lg border border-border" title="PDF Preview" />
+            <iframe
+              src={previewUrl}
+              className="w-full h-[600px] rounded-lg border border-border"
+              title="PDF Preview"
+            />
           ) : previewMime.startsWith("image/") ? (
-            <img src={previewUrl} alt="Medical record" className="max-w-full rounded-lg border border-border" />
+            <img
+              src={previewUrl}
+              alt="Medical record"
+              className="max-w-full rounded-lg border border-border"
+            />
           ) : (
-            <p className="text-sm text-muted-foreground">Preview not available for this file type. Use Download instead.</p>
+            <p className="text-sm text-muted-foreground">
+              Preview not available for this file type. Use Download instead.
+            </p>
           )}
         </Card>
       )}
@@ -286,11 +372,17 @@ function RecordDetail() {
         <ul className="divide-y divide-border">
           {audit.map((a) => (
             <li key={a.id} className="py-2 flex items-center justify-between text-sm">
-              <span>{a.eventType} · {shortAddr(a.walletAddress)}</span>
-              <span className="text-muted-foreground text-xs">{new Date(a.timestamp).toLocaleString()}</span>
+              <span>
+                {a.eventType} · {shortAddr(a.walletAddress)}
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {new Date(a.timestamp).toLocaleString()}
+              </span>
             </li>
           ))}
-          {audit.length === 0 && <li className="text-sm text-muted-foreground py-2">No access events yet.</li>}
+          {audit.length === 0 && (
+            <li className="text-sm text-muted-foreground py-2">No access events yet.</li>
+          )}
         </ul>
       </Card>
     </div>

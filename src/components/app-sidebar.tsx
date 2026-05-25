@@ -1,8 +1,27 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Activity, Upload, FileText, Shield, ScrollText, User, LayoutDashboard, Send, Bell, Stethoscope } from "lucide-react";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, useSidebar,
+  Activity,
+  Upload,
+  FileText,
+  Shield,
+  ScrollText,
+  User,
+  LayoutDashboard,
+  Send,
+  Bell,
+  Stethoscope,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const patientItems = [
@@ -33,7 +52,11 @@ export function AppSidebar({ role }: { role: "patient" | "doctor" }) {
       <SidebarHeader className="border-b border-sidebar-border">
         <Link to="/" className="flex items-center gap-2 px-2 py-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-hero text-primary-foreground shadow-card">
-            {role === "doctor" ? <Stethoscope className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
+            {role === "doctor" ? (
+              <Stethoscope className="h-5 w-5" />
+            ) : (
+              <Activity className="h-5 w-5" />
+            )}
           </div>
           {!collapsed && (
             <div className="leading-tight">

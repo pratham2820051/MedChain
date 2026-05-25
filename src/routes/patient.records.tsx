@@ -3,16 +3,36 @@ import { PageHeader } from "@/components/stats-card";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useStore, deleteRecord, type RecordType } from "@/lib/mock-store";
 import { openIpfsFile, downloadFromIPFS, isRealCid } from "@/services/ipfsService";
 import { useMemo, useState } from "react";
 import { Download, Eye, ExternalLink, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/patient/records")({
@@ -20,7 +40,15 @@ export const Route = createFileRoute("/patient/records")({
   component: RecordsPage,
 });
 
-const types: (RecordType | "All")[] = ["All", "Lab Report", "Prescription", "Scan", "X-Ray", "MRI", "Other"];
+const types: (RecordType | "All")[] = [
+  "All",
+  "Lab Report",
+  "Prescription",
+  "Scan",
+  "X-Ray",
+  "MRI",
+  "Other",
+];
 
 function RecordsPage() {
   const records = useStore((s) => s.records);
@@ -28,11 +56,16 @@ function RecordsPage() {
   const [type, setType] = useState<RecordType | "All">("All");
   const [downloading, setDownloading] = useState<string | null>(null);
 
-  const filtered = useMemo(() =>
-    records.filter((r) =>
-      (type === "All" || r.type === type) &&
-      (r.name.toLowerCase().includes(q.toLowerCase()) || r.type.toLowerCase().includes(q.toLowerCase()))
-    ), [records, q, type]);
+  const filtered = useMemo(
+    () =>
+      records.filter(
+        (r) =>
+          (type === "All" || r.type === type) &&
+          (r.name.toLowerCase().includes(q.toLowerCase()) ||
+            r.type.toLowerCase().includes(q.toLowerCase())),
+      ),
+    [records, q, type],
+  );
 
   const handleDownload = async (id: string, cid: string, fileName: string) => {
     if (!isRealCid(cid)) {
@@ -57,11 +90,24 @@ function RecordsPage() {
         <div className="flex flex-wrap gap-2 items-center mb-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search records" className="pl-9" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search records"
+              className="pl-9"
+            />
           </div>
           <Select value={type} onValueChange={(v) => setType(v as RecordType | "All")}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-            <SelectContent>{types.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+            <SelectTrigger className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {types.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         <div className="overflow-x-auto">
@@ -90,7 +136,9 @@ function RecordsPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <span className="text-xs rounded-full bg-accent/30 px-2 py-0.5">{r.status}</span>
+                    <span className="text-xs rounded-full bg-accent/30 px-2 py-0.5">
+                      {r.status}
+                    </span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
@@ -108,8 +156,11 @@ function RecordsPage() {
                           variant="ghost"
                           title="Open in IPFS"
                           onClick={() => {
-                            try { openIpfsFile(r.ipfsCid!); }
-                            catch (err: unknown) { toast.error((err as Error).message); }
+                            try {
+                              openIpfsFile(r.ipfsCid!);
+                            } catch (err: unknown) {
+                              toast.error((err as Error).message);
+                            }
                           }}
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -138,12 +189,18 @@ function RecordsPage() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete record?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This removes the record from your local list. The file on IPFS remains pinned.
+                              This removes the record from your local list. The file on IPFS remains
+                              pinned.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => { deleteRecord(r.id); toast.success("Record deleted"); }}>
+                            <AlertDialogAction
+                              onClick={() => {
+                                deleteRecord(r.id);
+                                toast.success("Record deleted");
+                              }}
+                            >
                               Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>

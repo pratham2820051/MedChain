@@ -2,15 +2,28 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-  Activity, Shield, FileLock2, Users, History, Share2, Lock,
-  ArrowRight, CheckCircle2, Zap, Star,
+  Activity,
+  Shield,
+  FileLock2,
+  Users,
+  History,
+  Share2,
+  Lock,
+  ArrowRight,
+  CheckCircle2,
+  Zap,
+  Star,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "MedChain — Own Your Medical Records" },
-      { name: "description", content: "Secure, transparent healthcare data management. Patients control access to their medical records." },
+      {
+        name: "description",
+        content:
+          "Secure, transparent healthcare data management. Patients control access to their medical records.",
+      },
       { property: "og:title", content: "MedChain — Own Your Medical Records" },
       { property: "og:description", content: "Secure, transparent healthcare data management." },
     ],
@@ -80,7 +93,6 @@ const trust = [
 function Landing() {
   return (
     <div className="min-h-screen bg-soft overflow-x-hidden">
-
       {/* ── STICKY NAV ───────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-soft/80 backdrop-blur-xl">
         <div className="flex items-center justify-between max-w-7xl mx-auto px-5 lg:px-10 py-4">
@@ -92,9 +104,15 @@ function Landing() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#features" className="nav-link hover:text-foreground">Features</a>
-            <a href="#trust"    className="nav-link hover:text-foreground">Security</a>
-            <a href="#footer"   className="nav-link hover:text-foreground">Contact</a>
+            <a href="#features" className="nav-link hover:text-foreground">
+              Features
+            </a>
+            <a href="#trust" className="nav-link hover:text-foreground">
+              Security
+            </a>
+            <a href="#footer" className="nav-link hover:text-foreground">
+              Contact
+            </a>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -102,7 +120,9 @@ function Landing() {
               <Link to="/connect">Sign In</Link>
             </Button>
             <Button asChild size="sm" className="bg-hero text-white hover:opacity-90 shadow-card">
-              <Link to="/connect">Get Started <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
+              <Link to="/connect">
+                Get Started <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -124,14 +144,15 @@ function Landing() {
 
           {/* Headline */}
           <h1 className="fade-in-up delay-100 text-5xl sm:text-6xl lg:text-[82px] font-extrabold tracking-tight leading-[1.05] text-foreground">
-            Own Your<br />
+            Own Your
+            <br />
             <span className="gradient-text">Medical Records</span>
           </h1>
 
           {/* Sub-copy */}
           <p className="fade-in-up delay-200 mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Secure, transparent healthcare data management on the blockchain.
-            Decide who sees your history — and revoke it in one tap.
+            Secure, transparent healthcare data management on the blockchain. Decide who sees your
+            history — and revoke it in one tap.
           </p>
 
           {/* CTAs */}
@@ -172,7 +193,9 @@ function Landing() {
           {stats.map((s) => (
             <div key={s.label}>
               <div className="text-3xl font-black gradient-text">{s.value}</div>
-              <div className="text-xs text-muted-foreground mt-1 font-medium uppercase tracking-wide">{s.label}</div>
+              <div className="text-xs text-muted-foreground mt-1 font-medium uppercase tracking-wide">
+                {s.label}
+              </div>
             </div>
           ))}
         </div>
@@ -194,11 +217,10 @@ function Landing() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((f) => (
-            <Card
-              key={f.title}
-              className="feature-card glass p-6 group cursor-default"
-            >
-              <div className={`icon-ring h-12 w-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-5`}>
+            <Card key={f.title} className="feature-card glass p-6 group cursor-default">
+              <div
+                className={`icon-ring h-12 w-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-5`}
+              >
                 <f.icon className={`h-5 w-5 ${f.iconColor}`} />
               </div>
               <h3 className="font-bold text-base mb-2 text-foreground">{f.title}</h3>
@@ -218,15 +240,21 @@ function Landing() {
                 <Star className="h-3.5 w-3.5 fill-accent text-accent" /> Security-first design
               </div>
               <h2 className="text-3xl font-extrabold tracking-tight text-foreground mb-4">
-                Your data, your rules.<br />
+                Your data, your rules.
+                <br />
                 <span className="gradient-text">Always.</span>
               </h2>
               <p className="text-muted-foreground text-sm leading-relaxed mb-7 max-w-md">
-                MedChain is architected so that even we cannot access your data.
-                All encryption happens on your device before anything reaches our servers.
+                MedChain is architected so that even we cannot access your data. All encryption
+                happens on your device before anything reaches our servers.
               </p>
-              <Button asChild className="bg-hero text-white hover:opacity-90 rounded-xl font-semibold shadow-glow">
-                <Link to="/connect">Start Protecting Your Records <ArrowRight className="h-4 w-4 ml-2" /></Link>
+              <Button
+                asChild
+                className="bg-hero text-white hover:opacity-90 rounded-xl font-semibold shadow-glow"
+              >
+                <Link to="/connect">
+                  Start Protecting Your Records <ArrowRight className="h-4 w-4 ml-2" />
+                </Link>
               </Button>
             </div>
 
@@ -257,7 +285,8 @@ function Landing() {
                 Ready to own your health data?
               </h2>
               <p className="text-white/80 text-sm sm:text-base mb-8 max-w-lg mx-auto">
-                Join patients who've taken control. Connect your wallet in seconds — no account, no email required.
+                Join patients who've taken control. Connect your wallet in seconds — no account, no
+                email required.
               </p>
               <Button
                 asChild
@@ -291,8 +320,16 @@ function Landing() {
           <div>
             <div className="font-semibold mb-3 text-foreground/90">Product</div>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#trust" className="hover:text-foreground transition-colors">Security</a></li>
+              <li>
+                <a href="#features" className="hover:text-foreground transition-colors">
+                  Features
+                </a>
+              </li>
+              <li>
+                <a href="#trust" className="hover:text-foreground transition-colors">
+                  Security
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -307,14 +344,19 @@ function Landing() {
           <div>
             <div className="font-semibold mb-3 text-foreground/90">Legal</div>
             <ul className="space-y-2 text-muted-foreground">
-              <li className="hover:text-foreground transition-colors cursor-pointer">Privacy Policy</li>
-              <li className="hover:text-foreground transition-colors cursor-pointer">Terms of Service</li>
+              <li className="hover:text-foreground transition-colors cursor-pointer">
+                Privacy Policy
+              </li>
+              <li className="hover:text-foreground transition-colors cursor-pointer">
+                Terms of Service
+              </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-border/40 py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} MedChain. All rights reserved. Built with 💙 for patient privacy.
+          © {new Date().getFullYear()} MedChain. All rights reserved. Built with 💙 for patient
+          privacy.
         </div>
       </footer>
     </div>

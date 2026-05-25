@@ -53,7 +53,9 @@ export function AppShell({ role, children }: { role: "patient" | "doctor"; child
               {/* Wallet address pill */}
               {isConnected ? (
                 <div className="flex items-center gap-2 rounded-full glass px-3 py-1.5 text-xs font-medium">
-                  <span className={`h-2 w-2 rounded-full ${isCorrectNetwork ? "bg-accent" : "bg-yellow-500"}`} />
+                  <span
+                    className={`h-2 w-2 rounded-full ${isCorrectNetwork ? "bg-accent" : "bg-yellow-500"}`}
+                  />
                   <Wallet className="h-3.5 w-3.5" />
                   {shortAddr(walletAddress)}
                 </div>
@@ -63,12 +65,7 @@ export function AppShell({ role, children }: { role: "patient" | "doctor"; child
                 </Button>
               )}
 
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={handleDisconnect}
-                title="Disconnect"
-              >
+              <Button size="icon" variant="ghost" onClick={handleDisconnect} title="Disconnect">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>

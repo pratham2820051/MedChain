@@ -1,7 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet, ShieldCheck, Activity, Stethoscope, User, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  Wallet,
+  ShieldCheck,
+  Activity,
+  Stethoscope,
+  User,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { setRole, shortAddr, useStore, type UserRole } from "@/lib/mock-store";
@@ -154,7 +162,8 @@ function ConnectPage() {
                 <div className="rounded-xl border border-yellow-500/40 bg-yellow-500/10 p-3 flex items-start gap-2 text-sm text-yellow-700 dark:text-yellow-400">
                   <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                   <div className="flex-1">
-                    <span className="font-medium">Wrong network.</span> Please switch to Sepolia Testnet.
+                    <span className="font-medium">Wrong network.</span> Please switch to Sepolia
+                    Testnet.
                   </div>
                   <Button
                     size="sm"

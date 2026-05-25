@@ -4,9 +4,21 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { shortAddr } from "@/lib/mock-store";
-import { getRecords, checkAccess, parseContractError, type ChainRecord } from "@/services/medchainService";
+import {
+  getRecords,
+  checkAccess,
+  parseContractError,
+  type ChainRecord,
+} from "@/services/medchainService";
 import { buildGatewayUrl, isRealCid } from "@/services/ipfsService";
 import { decryptWithKey } from "@/services/encryptionService";
 import { useWallet } from "@/hooks/useWallet";
@@ -14,7 +26,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Search, Loader2, ShieldCheck, ShieldOff, Download, Eye } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/doctor/records")({
@@ -43,9 +60,18 @@ function PatientRecords() {
 
   const handleFetch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!patientAddr) { toast.error("Enter a patient address."); return; }
-    if (!/^0x[a-fA-F0-9]{40}$/.test(patientAddr)) { toast.error("Invalid patient wallet address."); return; }
-    if (!isConnected || !isCorrectNetwork) { toast.error("Connect MetaMask on Sepolia first."); return; }
+    if (!patientAddr) {
+      toast.error("Enter a patient address.");
+      return;
+    }
+    if (!/^0x[a-fA-F0-9]{40}$/.test(patientAddr)) {
+      toast.error("Invalid patient wallet address.");
+      return;
+    }
+    if (!isConnected || !isCorrectNetwork) {
+      toast.error("Connect MetaMask on Sepolia first.");
+      return;
+    }
 
     setLoading(true);
     setSearched(false);
@@ -78,19 +104,29 @@ function PatientRecords() {
   const handleDecrypt = async () => {
     if (decryptIndex === null) return;
     const record = records[decryptIndex];
-    if (!aesKeyInput.trim()) { toast.error("Enter the AES decryption key."); return; }
-    if (!isRealCid(record.ipfsHash)) { toast.error("No real IPFS file for this record."); return; }
+    if (!aesKeyInput.trim()) {
+      toast.error("Enter the AES decryption key.");
+      return;
+    }
+    if (!isRealCid(record.ipfsHash)) {
+      toast.error("No real IPFS file for this record.");
+      return;
+    }
 
     setDecrypting(true);
     try {
       const gatewayUrl = buildGatewayUrl(record.ipfsHash);
       const fileName = `record-${decryptIndex + 1}`;
-      const { objectUrl, mimeType } = await decryptWithKey(gatewayUrl, aesKeyInput.trim(), fileName);
+      const { objectUrl, mimeType } = await decryptWithKey(
+        gatewayUrl,
+        aesKeyInput.trim(),
+        fileName,
+      );
 
       setRecords((prev) =>
         prev.map((r, i) =>
-          i === decryptIndex ? { ...r, previewUrl: objectUrl, previewMime: mimeType } : r
-        )
+          i === decryptIndex ? { ...r, previewUrl: objectUrl, previewMime: mimeType } : r,
+        ),
       );
       setDecryptOpen(false);
       toast.success("File decrypted successfully");
@@ -103,7 +139,10 @@ function PatientRecords() {
 
   const handleDownload = (index: number) => {
     const record = records[index];
-    if (!record.previewUrl) { toast.error("Decrypt the file first."); return; }
+    if (!record.previewUrl) {
+      toast.error("Decrypt the file first.");
+      return;
+    }
     const a = document.createElement("a");
     a.href = record.previewUrl;
     a.download = `record-${index + 1}`;
@@ -115,28 +154,65 @@ function PatientRecords() {
 
   return (
     <div>
-      <PageHeader title="Patient Records" description="Retrieve and decrypt records from authorized patients." />
+      <PageHeader
+        title="Patient Records"
+        description="Retrieve and decrypt records from authorized patients."
+      />
 
       {/* Search */}
       <Card className="glass p-5 mb-4">
         <form onSubmit={handleFetch} className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-[260px]">
             <Label htmlFor="patient-addr">Patient Wallet Address</Label>
-            <Input id="patient-addr" value={patientAddr} onChange={(e) => setPatientAddr(e.target.value)} placeholder="0x…" className="font-mono mt-1" />
+            <Input
+              id="patient-addr"
+              value={patientAddr}
+              onChange={(e) => setPatientAddr(e.target.value)}
+              placeholder="0x…"
+              className="font-mono mt-1"
+            />
           </div>
-          <Button type="submit" disabled={loading || !isConnected || !isCorrectNetwork} className="bg-hero text-primary-foreground">
-            {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Fetching…</> : <><Search className="h-4 w-4 mr-2" />Fetch Records</>}
+          <Button
+            type="submit"
+            disabled={loading || !isConnected || !isCorrectNetwork}
+            className="bg-hero text-primary-foreground"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Fetching…
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4 mr-2" />
+                Fetch Records
+              </>
+            )}
           </Button>
         </form>
-        {!isConnected && <p className="text-xs text-muted-foreground mt-2">Connect MetaMask to fetch records.</p>}
-        {isConnected && !isCorrectNetwork && <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">Switch to Sepolia Testnet.</p>}
+        {!isConnected && (
+          <p className="text-xs text-muted-foreground mt-2">Connect MetaMask to fetch records.</p>
+        )}
+        {isConnected && !isCorrectNetwork && (
+          <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+            Switch to Sepolia Testnet.
+          </p>
+        )}
       </Card>
 
       {/* Access banner */}
       {searched && hasAccess !== null && (
-        <div className={`mb-4 rounded-xl border p-3 flex items-center gap-2 text-sm ${hasAccess ? "border-accent/40 bg-accent/10" : "border-destructive/40 bg-destructive/10 text-destructive"}`}>
-          {hasAccess ? <ShieldCheck className="h-4 w-4 shrink-0 text-accent" /> : <ShieldOff className="h-4 w-4 shrink-0" />}
-          {hasAccess ? "Access verified — records retrieved from blockchain." : "Access denied or expired. Ask the patient to grant you access."}
+        <div
+          className={`mb-4 rounded-xl border p-3 flex items-center gap-2 text-sm ${hasAccess ? "border-accent/40 bg-accent/10" : "border-destructive/40 bg-destructive/10 text-destructive"}`}
+        >
+          {hasAccess ? (
+            <ShieldCheck className="h-4 w-4 shrink-0 text-accent" />
+          ) : (
+            <ShieldOff className="h-4 w-4 shrink-0" />
+          )}
+          {hasAccess
+            ? "Access verified — records retrieved from blockchain."
+            : "Access denied or expired. Ask the patient to grant you access."}
         </div>
       )}
 
@@ -159,9 +235,11 @@ function PatientRecords() {
                 <TableCell className="font-mono text-xs">{shortAddr(patientAddr)}</TableCell>
                 <TableCell className="font-medium">{r.recordType}</TableCell>
                 <TableCell className="font-mono text-xs">
-                  {isRealCid(r.ipfsHash)
-                    ? <span className="text-primary">{r.ipfsHash.slice(0, 14)}…</span>
-                    : <span className="text-muted-foreground">dummy CID</span>}
+                  {isRealCid(r.ipfsHash) ? (
+                    <span className="text-primary">{r.ipfsHash.slice(0, 14)}…</span>
+                  ) : (
+                    <span className="text-muted-foreground">dummy CID</span>
+                  )}
                 </TableCell>
                 <TableCell>{new Date(r.timestamp * 1000).toLocaleDateString()}</TableCell>
                 <TableCell className="font-mono text-xs">{shortAddr(r.uploadedBy)}</TableCell>
@@ -169,15 +247,26 @@ function PatientRecords() {
                   <div className="flex justify-end gap-1">
                     {isRealCid(r.ipfsHash) && !r.previewUrl && (
                       <Button size="sm" variant="outline" onClick={() => openDecryptDialog(i)}>
-                        <ShieldCheck className="h-3.5 w-3.5 mr-1" />Decrypt
+                        <ShieldCheck className="h-3.5 w-3.5 mr-1" />
+                        Decrypt
                       </Button>
                     )}
                     {r.previewUrl && (
                       <>
-                        <Button size="icon" variant="ghost" title="View" onClick={() => window.open(r.previewUrl, "_blank")}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="View"
+                          onClick={() => window.open(r.previewUrl, "_blank")}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" title="Download" onClick={() => handleDownload(i)}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Download"
+                          onClick={() => handleDownload(i)}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
                       </>
@@ -187,10 +276,18 @@ function PatientRecords() {
               </TableRow>
             ))}
             {searched && records.length === 0 && hasAccess && (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No records found.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  No records found.
+                </TableCell>
+              </TableRow>
             )}
             {!searched && (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Enter a patient address above to fetch records.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  Enter a patient address above to fetch records.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
@@ -204,20 +301,38 @@ function PatientRecords() {
               <Card key={i} className="glass p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-semibold text-sm">{r.recordType} — Decrypted Preview</h2>
-                  <Button size="sm" variant="ghost" onClick={() => {
-                    URL.revokeObjectURL(r.previewUrl!);
-                    setRecords((prev) => prev.map((rec, idx) => idx === i ? { ...rec, previewUrl: undefined } : rec));
-                  }}>Close</Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      URL.revokeObjectURL(r.previewUrl!);
+                      setRecords((prev) =>
+                        prev.map((rec, idx) =>
+                          idx === i ? { ...rec, previewUrl: undefined } : rec,
+                        ),
+                      );
+                    }}
+                  >
+                    Close
+                  </Button>
                 </div>
                 {r.previewMime === "application/pdf" ? (
-                  <iframe src={r.previewUrl} className="w-full h-[600px] rounded-lg border border-border" title="PDF" />
+                  <iframe
+                    src={r.previewUrl}
+                    className="w-full h-[600px] rounded-lg border border-border"
+                    title="PDF"
+                  />
                 ) : r.previewMime?.startsWith("image/") ? (
-                  <img src={r.previewUrl} alt="Record" className="max-w-full rounded-lg border border-border" />
+                  <img
+                    src={r.previewUrl}
+                    alt="Record"
+                    className="max-w-full rounded-lg border border-border"
+                  />
                 ) : (
                   <p className="text-sm text-muted-foreground">Use Download to save this file.</p>
                 )}
               </Card>
-            ) : null
+            ) : null,
           )}
         </div>
       )}
@@ -245,9 +360,22 @@ function PatientRecords() {
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDecryptOpen(false)}>Cancel</Button>
-            <Button onClick={handleDecrypt} disabled={decrypting} className="bg-hero text-primary-foreground">
-              {decrypting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Decrypting…</> : "Decrypt & View"}
+            <Button variant="outline" onClick={() => setDecryptOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDecrypt}
+              disabled={decrypting}
+              className="bg-hero text-primary-foreground"
+            >
+              {decrypting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Decrypting…
+                </>
+              ) : (
+                "Decrypt & View"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

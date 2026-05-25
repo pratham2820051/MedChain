@@ -12,8 +12,8 @@ import { getMedChainContract, getMedChainContractReadOnly } from "@/contracts/co
 export interface ChainRecord {
   ipfsHash: string;
   recordType: string;
-  timestamp: number;   // unix seconds
-  uploadedBy: string;  // wallet address
+  timestamp: number; // unix seconds
+  uploadedBy: string; // wallet address
 }
 
 // ── FR-1  Register Patient ────────────────────────────────────────────────────
@@ -37,10 +37,7 @@ export async function registerPatient(): Promise<void> {
  * @param recordType  e.g. "Lab Report", "X-Ray"
  * @param ipfsHash    IPFS CID (defaults to dummy for Phase 3)
  */
-export async function uploadRecord(
-  recordType: string,
-  ipfsHash = "QmDummyCID123"
-): Promise<void> {
+export async function uploadRecord(recordType: string, ipfsHash = "QmDummyCID123"): Promise<void> {
   const contract = await getMedChainContract();
   const tx = await contract.uploadRecord(ipfsHash, recordType);
   await tx.wait();
@@ -54,10 +51,7 @@ export async function uploadRecord(
  * @param doctorAddress  Doctor's wallet address (0x…)
  * @param expiryDate     ISO date string e.g. "2026-01-01"
  */
-export async function grantAccess(
-  doctorAddress: string,
-  expiryDate: string
-): Promise<void> {
+export async function grantAccess(doctorAddress: string, expiryDate: string): Promise<void> {
   const expiryTimestamp = Math.floor(new Date(expiryDate).getTime() / 1000);
   const contract = await getMedChainContract();
   const tx = await contract.grantAccess(doctorAddress, expiryTimestamp);
@@ -83,10 +77,7 @@ export async function revokeAccess(doctorAddress: string): Promise<void> {
  * Returns true if the doctor currently has valid, non-expired access.
  * Read-only — no MetaMask popup.
  */
-export async function checkAccess(
-  patientAddress: string,
-  doctorAddress: string
-): Promise<boolean> {
+export async function checkAccess(patientAddress: string, doctorAddress: string): Promise<boolean> {
   const contract = await getMedChainContractReadOnly();
   return contract.checkAccess(patientAddress, doctorAddress) as Promise<boolean>;
 }
@@ -101,8 +92,12 @@ export async function checkAccess(
 export async function getRecords(patientAddress: string): Promise<ChainRecord[]> {
   const contract = await getMedChainContract();
   // getRecords is non-payable (emits event) so we use a transaction
-  const raw: Array<{ ipfsHash: string; recordType: string; timestamp: bigint; uploadedBy: string }> =
-    await contract.getRecords.staticCall(patientAddress);
+  const raw: Array<{
+    ipfsHash: string;
+    recordType: string;
+    timestamp: bigint;
+    uploadedBy: string;
+  }> = await contract.getRecords.staticCall(patientAddress);
 
   return raw.map((r) => ({
     ipfsHash: r.ipfsHash,

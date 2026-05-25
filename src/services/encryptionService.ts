@@ -65,8 +65,8 @@ export function removeKey(recordId: string): void {
 // ── Encrypt + Prepare for IPFS ────────────────────────────────────────────────
 
 export interface EncryptResult {
-  encryptedFile: File;   // ready to upload to IPFS
-  aesKey: string;        // hex key — save this with saveKey()
+  encryptedFile: File; // ready to upload to IPFS
+  aesKey: string; // hex key — save this with saveKey()
 }
 
 /**
@@ -76,10 +76,7 @@ export interface EncryptResult {
  * @param file      Original medical file
  * @param recordId  Unique ID to associate the key with
  */
-export async function encryptMedicalFile(
-  file: File,
-  recordId: string
-): Promise<EncryptResult> {
+export async function encryptMedicalFile(file: File, recordId: string): Promise<EncryptResult> {
   // Generate a fresh random key for this file
   const aesKey = generateAESKey();
 
@@ -98,7 +95,7 @@ export async function encryptMedicalFile(
 // ── Decrypt from IPFS ─────────────────────────────────────────────────────────
 
 export interface DecryptResult {
-  blob: Blob;       // decrypted file as Blob
+  blob: Blob; // decrypted file as Blob
   objectUrl: string; // temporary URL for preview/download
   mimeType: string;
 }
@@ -115,14 +112,12 @@ export async function decryptFromIPFS(
   cid: string,
   recordId: string,
   originalName: string,
-  gatewayUrl: string
+  gatewayUrl: string,
 ): Promise<DecryptResult> {
   // Get the key
   const aesKey = getKey(recordId);
   if (!aesKey) {
-    throw new Error(
-      "Unable to decrypt record — encryption key not found on this device."
-    );
+    throw new Error("Unable to decrypt record — encryption key not found on this device.");
   }
 
   // Download encrypted file from IPFS
@@ -149,7 +144,7 @@ export async function decryptFromIPFS(
 export async function decryptWithKey(
   gatewayUrl: string,
   aesKey: string,
-  originalName: string
+  originalName: string,
 ): Promise<DecryptResult> {
   const response = await fetch(gatewayUrl);
   if (!response.ok) {

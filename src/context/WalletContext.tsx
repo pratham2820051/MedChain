@@ -11,13 +11,7 @@
  *   disconnect()   – clear local state
  */
 
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import { formatEther } from "ethers";
 import { getProvider, SEPOLIA_CHAIN_ID, SEPOLIA_CHAIN_HEX } from "@/contracts/contract";
 

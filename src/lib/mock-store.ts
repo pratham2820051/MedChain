@@ -13,9 +13,9 @@ export interface MedRecord {
   status: "Active" | "Archived";
   ownerAddress: string;
   fileName?: string;
-  ipfsCid?: string;        // real IPFS CID from Phase 4
+  ipfsCid?: string; // real IPFS CID from Phase 4
   ipfsGatewayUrl?: string; // full gateway URL
-  isEncrypted?: boolean;   // Phase 5 — true if file was AES encrypted
+  isEncrypted?: boolean; // Phase 5 — true if file was AES encrypted
 }
 
 export interface AccessGrant {
@@ -79,7 +79,8 @@ if (typeof window !== "undefined") {
   localStorage.removeItem("medchain_state_v1");
 }
 
-const txId = () => "0x" + Math.random().toString(16).slice(2, 10) + Math.random().toString(16).slice(2, 10);
+const txId = () =>
+  "0x" + Math.random().toString(16).slice(2, 10) + Math.random().toString(16).slice(2, 10);
 
 const seed = (): StoreState => {
   return {
@@ -166,17 +167,44 @@ export function setRole(role: UserRole) {
   }));
 }
 
-export async function uploadRecord(input: { name: string; type: RecordType; fileName: string; description?: string; ipfsCid?: string; ipfsGatewayUrl?: string; isEncrypted?: boolean }) {
+export async function uploadRecord(input: {
+  name: string;
+  type: RecordType;
+  fileName: string;
+  description?: string;
+  ipfsCid?: string;
+  ipfsGatewayUrl?: string;
+  isEncrypted?: boolean;
+}) {
   await new Promise((r) => setTimeout(r, 800));
   const id = "r" + Math.random().toString(36).slice(2, 8);
   setState((s) => ({
     ...s,
     records: [
-      { id, name: input.name, type: input.type, fileName: input.fileName, description: input.description, uploadDate: new Date().toISOString().slice(0, 10), status: "Active", ownerAddress: s.wallet ?? s.profile.address, ipfsCid: input.ipfsCid, ipfsGatewayUrl: input.ipfsGatewayUrl, isEncrypted: input.isEncrypted },
+      {
+        id,
+        name: input.name,
+        type: input.type,
+        fileName: input.fileName,
+        description: input.description,
+        uploadDate: new Date().toISOString().slice(0, 10),
+        status: "Active",
+        ownerAddress: s.wallet ?? s.profile.address,
+        ipfsCid: input.ipfsCid,
+        ipfsGatewayUrl: input.ipfsGatewayUrl,
+        isEncrypted: input.isEncrypted,
+      },
       ...s.records,
     ],
     audit: [
-      { id: "a" + Math.random().toString(36).slice(2, 8), eventType: "Upload", walletAddress: s.wallet ?? s.profile.address, timestamp: new Date().toISOString(), txId: txId(), status: "Success" },
+      {
+        id: "a" + Math.random().toString(36).slice(2, 8),
+        eventType: "Upload",
+        walletAddress: s.wallet ?? s.profile.address,
+        timestamp: new Date().toISOString(),
+        txId: txId(),
+        status: "Success",
+      },
       ...s.audit,
     ],
   }));
@@ -192,11 +220,24 @@ export async function grantAccess(doctorAddress: string, expiryDate: string) {
   setState((s) => ({
     ...s,
     grants: [
-      { id: "g" + Math.random().toString(36).slice(2, 8), doctorAddress, patientAddress: s.wallet ?? s.profile.address, expiryDate, status: "Active" },
+      {
+        id: "g" + Math.random().toString(36).slice(2, 8),
+        doctorAddress,
+        patientAddress: s.wallet ?? s.profile.address,
+        expiryDate,
+        status: "Active",
+      },
       ...s.grants,
     ],
     audit: [
-      { id: "a" + Math.random().toString(36).slice(2, 8), eventType: "Grant", walletAddress: s.wallet ?? s.profile.address, timestamp: new Date().toISOString(), txId: txId(), status: "Success" },
+      {
+        id: "a" + Math.random().toString(36).slice(2, 8),
+        eventType: "Grant",
+        walletAddress: s.wallet ?? s.profile.address,
+        timestamp: new Date().toISOString(),
+        txId: txId(),
+        status: "Success",
+      },
       ...s.audit,
     ],
   }));
@@ -208,7 +249,14 @@ export async function revokeAccess(grantId: string) {
     ...s,
     grants: s.grants.map((g) => (g.id === grantId ? { ...g, status: "Revoked" } : g)),
     audit: [
-      { id: "a" + Math.random().toString(36).slice(2, 8), eventType: "Revoke", walletAddress: s.wallet ?? s.profile.address, timestamp: new Date().toISOString(), txId: txId(), status: "Success" },
+      {
+        id: "a" + Math.random().toString(36).slice(2, 8),
+        eventType: "Revoke",
+        walletAddress: s.wallet ?? s.profile.address,
+        timestamp: new Date().toISOString(),
+        txId: txId(),
+        status: "Success",
+      },
       ...s.audit,
     ],
   }));
@@ -219,11 +267,24 @@ export async function requestAccess(patientAddress: string) {
   setState((s) => ({
     ...s,
     requests: [
-      { id: "q" + Math.random().toString(36).slice(2, 8), patientAddress, doctorAddress: s.wallet ?? s.profile.address, requestDate: new Date().toISOString().slice(0, 10), status: "Pending" },
+      {
+        id: "q" + Math.random().toString(36).slice(2, 8),
+        patientAddress,
+        doctorAddress: s.wallet ?? s.profile.address,
+        requestDate: new Date().toISOString().slice(0, 10),
+        status: "Pending",
+      },
       ...s.requests,
     ],
     audit: [
-      { id: "a" + Math.random().toString(36).slice(2, 8), eventType: "Request", walletAddress: s.wallet ?? s.profile.address, timestamp: new Date().toISOString(), txId: txId(), status: "Pending" },
+      {
+        id: "a" + Math.random().toString(36).slice(2, 8),
+        eventType: "Request",
+        walletAddress: s.wallet ?? s.profile.address,
+        timestamp: new Date().toISOString(),
+        txId: txId(),
+        status: "Pending",
+      },
       ...s.audit,
     ],
   }));
@@ -240,7 +301,14 @@ export function downloadRecord(id: string) {
   setState((s) => ({
     ...s,
     audit: [
-      { id: "a" + Math.random().toString(36).slice(2, 8), eventType: "Download", walletAddress: s.wallet ?? s.profile.address, timestamp: new Date().toISOString(), txId: txId(), status: "Success" },
+      {
+        id: "a" + Math.random().toString(36).slice(2, 8),
+        eventType: "Download",
+        walletAddress: s.wallet ?? s.profile.address,
+        timestamp: new Date().toISOString(),
+        txId: txId(),
+        status: "Success",
+      },
       ...s.audit,
     ],
   }));

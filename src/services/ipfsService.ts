@@ -41,7 +41,7 @@ export const ALLOWED_EXTENSIONS = ["PDF", "PNG", "JPEG", "JPG", "DOCX"];
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface IpfsUploadResult {
-  cid: string;       // IPFS CID e.g. QmX9abc123xyz...
+  cid: string; // IPFS CID e.g. QmX9abc123xyz...
   gatewayUrl: string; // Full URL to view the file
   fileName: string;
   fileSize: number;
@@ -55,12 +55,14 @@ export interface IpfsUploadResult {
  */
 export function validateFile(file: File): void {
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    throw new Error(`Maximum file size is 20 MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`);
+    throw new Error(
+      `Maximum file size is 20 MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
+    );
   }
 
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
     throw new Error(
-      `Unsupported file type: ${file.type || "unknown"}. Allowed types: ${ALLOWED_EXTENSIONS.join(", ")}.`
+      `Unsupported file type: ${file.type || "unknown"}. Allowed types: ${ALLOWED_EXTENSIONS.join(", ")}.`,
     );
   }
 }
@@ -78,12 +80,10 @@ export function validateFile(file: File): void {
 export async function uploadToIPFS(
   file: File,
   recordName: string,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
 ): Promise<IpfsUploadResult> {
   if (!PINATA_JWT || PINATA_JWT === "your_pinata_jwt_token_here") {
-    throw new Error(
-      "Pinata JWT not configured. Add VITE_PINATA_JWT to your .env file."
-    );
+    throw new Error("Pinata JWT not configured. Add VITE_PINATA_JWT to your .env file.");
   }
 
   // Validate before uploading
@@ -127,7 +127,7 @@ export async function uploadToIPFS(
  */
 function uploadWithProgress(
   formData: FormData,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -153,7 +153,9 @@ function uploadWithProgress(
         try {
           const err = JSON.parse(xhr.responseText) as { error?: { details?: string } };
           if (err.error?.details) msg = err.error.details;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         reject(new Error(msg));
       }
     });
