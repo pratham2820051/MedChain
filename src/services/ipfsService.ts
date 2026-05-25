@@ -14,7 +14,11 @@
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const PINATA_JWT = import.meta.env.VITE_PINATA_JWT as string | undefined;
+// VITE_PINATA_JWT is injected at build time via .env (local) or Cloudflare env vars (hosted)
+const PINATA_JWT =
+  (import.meta.env.VITE_PINATA_JWT as string | undefined) ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI0YTliYjkxYS02ZWQzLTQ3ZmUtOTQ4Zi0yYjFkZDg0Yzk5YjYiLCJlbWFpbCI6InByYXRoYW1waDEyM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiYWM0N2Y4YWJkMWI2M2NkZDk1YTEiLCJzY29wZWRLZXlTZWNyZXQiOiJhZmVmYmNmN2M3NjRlZjNmNzk4Y2VkZGZiMDBlYTZlZmU5YzhmYmQ0ZTRkZjdiY2RhOTc0MmY1YjEwNDNiM2U3IiwiZXhwIjoxODExMjYzODAyfQ.d9zN__irYfG5B4ZmOdh8gS7UgSRB_zgTCpnTss7Pb6o";
+
 const PINATA_GATEWAY =
   (import.meta.env.VITE_PINATA_GATEWAY as string | undefined) ??
   "https://gateway.pinata.cloud/ipfs";
@@ -82,7 +86,7 @@ export async function uploadToIPFS(
   recordName: string,
   onProgress?: (pct: number) => void,
 ): Promise<IpfsUploadResult> {
-  if (!PINATA_JWT || PINATA_JWT === "your_pinata_jwt_token_here") {
+  if (!PINATA_JWT) {
     throw new Error("Pinata JWT not configured. Add VITE_PINATA_JWT to your .env file.");
   }
 
