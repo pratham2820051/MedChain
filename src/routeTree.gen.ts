@@ -21,6 +21,7 @@ import { Route as PatientAuditRouteImport } from './routes/patient.audit'
 import { Route as PatientAccessRouteImport } from './routes/patient.access'
 import { Route as DoctorRequestRouteImport } from './routes/doctor.request'
 import { Route as DoctorRecordsRouteImport } from './routes/doctor.records'
+import { Route as DoctorProfileRouteImport } from './routes/doctor.profile'
 import { Route as DoctorNotificationsRouteImport } from './routes/doctor.notifications'
 import { Route as DoctorDashboardRouteImport } from './routes/doctor.dashboard'
 import { Route as PatientRecordsIdRouteImport } from './routes/patient.records.$id'
@@ -85,6 +86,11 @@ const DoctorRecordsRoute = DoctorRecordsRouteImport.update({
   path: '/records',
   getParentRoute: () => DoctorRoute,
 } as any)
+const DoctorProfileRoute = DoctorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DoctorRoute,
+} as any)
 const DoctorNotificationsRoute = DoctorNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/patient': typeof PatientRouteWithChildren
   '/doctor/dashboard': typeof DoctorDashboardRoute
   '/doctor/notifications': typeof DoctorNotificationsRoute
+  '/doctor/profile': typeof DoctorProfileRoute
   '/doctor/records': typeof DoctorRecordsRoute
   '/doctor/request': typeof DoctorRequestRoute
   '/patient/access': typeof PatientAccessRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/patient': typeof PatientRouteWithChildren
   '/doctor/dashboard': typeof DoctorDashboardRoute
   '/doctor/notifications': typeof DoctorNotificationsRoute
+  '/doctor/profile': typeof DoctorProfileRoute
   '/doctor/records': typeof DoctorRecordsRoute
   '/doctor/request': typeof DoctorRequestRoute
   '/patient/access': typeof PatientAccessRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/patient': typeof PatientRouteWithChildren
   '/doctor/dashboard': typeof DoctorDashboardRoute
   '/doctor/notifications': typeof DoctorNotificationsRoute
+  '/doctor/profile': typeof DoctorProfileRoute
   '/doctor/records': typeof DoctorRecordsRoute
   '/doctor/request': typeof DoctorRequestRoute
   '/patient/access': typeof PatientAccessRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/patient'
     | '/doctor/dashboard'
     | '/doctor/notifications'
+    | '/doctor/profile'
     | '/doctor/records'
     | '/doctor/request'
     | '/patient/access'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/patient'
     | '/doctor/dashboard'
     | '/doctor/notifications'
+    | '/doctor/profile'
     | '/doctor/records'
     | '/doctor/request'
     | '/patient/access'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/patient'
     | '/doctor/dashboard'
     | '/doctor/notifications'
+    | '/doctor/profile'
     | '/doctor/records'
     | '/doctor/request'
     | '/patient/access'
@@ -300,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorRecordsRouteImport
       parentRoute: typeof DoctorRoute
     }
+    '/doctor/profile': {
+      id: '/doctor/profile'
+      path: '/profile'
+      fullPath: '/doctor/profile'
+      preLoaderRoute: typeof DoctorProfileRouteImport
+      parentRoute: typeof DoctorRoute
+    }
     '/doctor/notifications': {
       id: '/doctor/notifications'
       path: '/notifications'
@@ -327,6 +346,7 @@ declare module '@tanstack/react-router' {
 interface DoctorRouteChildren {
   DoctorDashboardRoute: typeof DoctorDashboardRoute
   DoctorNotificationsRoute: typeof DoctorNotificationsRoute
+  DoctorProfileRoute: typeof DoctorProfileRoute
   DoctorRecordsRoute: typeof DoctorRecordsRoute
   DoctorRequestRoute: typeof DoctorRequestRoute
 }
@@ -334,6 +354,7 @@ interface DoctorRouteChildren {
 const DoctorRouteChildren: DoctorRouteChildren = {
   DoctorDashboardRoute: DoctorDashboardRoute,
   DoctorNotificationsRoute: DoctorNotificationsRoute,
+  DoctorProfileRoute: DoctorProfileRoute,
   DoctorRecordsRoute: DoctorRecordsRoute,
   DoctorRequestRoute: DoctorRequestRoute,
 }
