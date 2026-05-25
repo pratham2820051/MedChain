@@ -72,7 +72,12 @@ interface StoreState {
   profile: Profile;
 }
 
-const KEY = "medchain_state_v2"; // bumped from v1 to clear old dummy data
+const KEY = "medchain_state_v2";
+
+// Clean up old localStorage keys from previous versions
+if (typeof window !== "undefined") {
+  localStorage.removeItem("medchain_state_v1");
+}
 
 const txId = () => "0x" + Math.random().toString(16).slice(2, 10) + Math.random().toString(16).slice(2, 10);
 
