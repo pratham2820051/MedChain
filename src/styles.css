@@ -147,3 +147,15 @@
     color: var(--color-foreground);
   }
 }
+
+@layer utilities {
+  .glass {
+    background: color-mix(in oklab, var(--card) 70%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+    box-shadow: var(--shadow-glass);
+  }
+  .bg-hero { background: var(--gradient-hero); }
+  .bg-soft { background: var(--gradient-soft); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+}
