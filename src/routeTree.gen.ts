@@ -9,38 +9,246 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PatientRouteImport } from './routes/patient'
+import { Route as DoctorRouteImport } from './routes/doctor'
+import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PatientUploadRouteImport } from './routes/patient.upload'
+import { Route as PatientRecordsRouteImport } from './routes/patient.records'
+import { Route as PatientProfileRouteImport } from './routes/patient.profile'
+import { Route as PatientDashboardRouteImport } from './routes/patient.dashboard'
+import { Route as PatientAuditRouteImport } from './routes/patient.audit'
+import { Route as PatientAccessRouteImport } from './routes/patient.access'
+import { Route as DoctorRequestRouteImport } from './routes/doctor.request'
+import { Route as DoctorRecordsRouteImport } from './routes/doctor.records'
+import { Route as DoctorProfileRouteImport } from './routes/doctor.profile'
+import { Route as DoctorNotificationsRouteImport } from './routes/doctor.notifications'
+import { Route as DoctorDashboardRouteImport } from './routes/doctor.dashboard'
+import { Route as PatientRecordsIdRouteImport } from './routes/patient.records.$id'
 
+const PatientRoute = PatientRouteImport.update({
+  id: '/patient',
+  path: '/patient',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DoctorRoute = DoctorRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectRoute = ConnectRouteImport.update({
+  id: '/connect',
+  path: '/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PatientUploadRoute = PatientUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientRecordsRoute = PatientRecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientProfileRoute = PatientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientDashboardRoute = PatientDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientAuditRoute = PatientAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientAccessRoute = PatientAccessRouteImport.update({
+  id: '/access',
+  path: '/access',
+  getParentRoute: () => PatientRoute,
+} as any)
+const DoctorRequestRoute = DoctorRequestRouteImport.update({
+  id: '/request',
+  path: '/request',
+  getParentRoute: () => DoctorRoute,
+} as any)
+const DoctorRecordsRoute = DoctorRecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => DoctorRoute,
+} as any)
+const DoctorProfileRoute = DoctorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DoctorRoute,
+} as any)
+const DoctorNotificationsRoute = DoctorNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => DoctorRoute,
+} as any)
+const DoctorDashboardRoute = DoctorDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => DoctorRoute,
+} as any)
+const PatientRecordsIdRoute = PatientRecordsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PatientRecordsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/connect': typeof ConnectRoute
+  '/doctor': typeof DoctorRouteWithChildren
+  '/patient': typeof PatientRouteWithChildren
+  '/doctor/dashboard': typeof DoctorDashboardRoute
+  '/doctor/notifications': typeof DoctorNotificationsRoute
+  '/doctor/profile': typeof DoctorProfileRoute
+  '/doctor/records': typeof DoctorRecordsRoute
+  '/doctor/request': typeof DoctorRequestRoute
+  '/patient/access': typeof PatientAccessRoute
+  '/patient/audit': typeof PatientAuditRoute
+  '/patient/dashboard': typeof PatientDashboardRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/records': typeof PatientRecordsRouteWithChildren
+  '/patient/upload': typeof PatientUploadRoute
+  '/patient/records/$id': typeof PatientRecordsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connect': typeof ConnectRoute
+  '/doctor': typeof DoctorRouteWithChildren
+  '/patient': typeof PatientRouteWithChildren
+  '/doctor/dashboard': typeof DoctorDashboardRoute
+  '/doctor/notifications': typeof DoctorNotificationsRoute
+  '/doctor/profile': typeof DoctorProfileRoute
+  '/doctor/records': typeof DoctorRecordsRoute
+  '/doctor/request': typeof DoctorRequestRoute
+  '/patient/access': typeof PatientAccessRoute
+  '/patient/audit': typeof PatientAuditRoute
+  '/patient/dashboard': typeof PatientDashboardRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/records': typeof PatientRecordsRouteWithChildren
+  '/patient/upload': typeof PatientUploadRoute
+  '/patient/records/$id': typeof PatientRecordsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/connect': typeof ConnectRoute
+  '/doctor': typeof DoctorRouteWithChildren
+  '/patient': typeof PatientRouteWithChildren
+  '/doctor/dashboard': typeof DoctorDashboardRoute
+  '/doctor/notifications': typeof DoctorNotificationsRoute
+  '/doctor/profile': typeof DoctorProfileRoute
+  '/doctor/records': typeof DoctorRecordsRoute
+  '/doctor/request': typeof DoctorRequestRoute
+  '/patient/access': typeof PatientAccessRoute
+  '/patient/audit': typeof PatientAuditRoute
+  '/patient/dashboard': typeof PatientDashboardRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/records': typeof PatientRecordsRouteWithChildren
+  '/patient/upload': typeof PatientUploadRoute
+  '/patient/records/$id': typeof PatientRecordsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/connect'
+    | '/doctor'
+    | '/patient'
+    | '/doctor/dashboard'
+    | '/doctor/notifications'
+    | '/doctor/profile'
+    | '/doctor/records'
+    | '/doctor/request'
+    | '/patient/access'
+    | '/patient/audit'
+    | '/patient/dashboard'
+    | '/patient/profile'
+    | '/patient/records'
+    | '/patient/upload'
+    | '/patient/records/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/connect'
+    | '/doctor'
+    | '/patient'
+    | '/doctor/dashboard'
+    | '/doctor/notifications'
+    | '/doctor/profile'
+    | '/doctor/records'
+    | '/doctor/request'
+    | '/patient/access'
+    | '/patient/audit'
+    | '/patient/dashboard'
+    | '/patient/profile'
+    | '/patient/records'
+    | '/patient/upload'
+    | '/patient/records/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/connect'
+    | '/doctor'
+    | '/patient'
+    | '/doctor/dashboard'
+    | '/doctor/notifications'
+    | '/doctor/profile'
+    | '/doctor/records'
+    | '/doctor/request'
+    | '/patient/access'
+    | '/patient/audit'
+    | '/patient/dashboard'
+    | '/patient/profile'
+    | '/patient/records'
+    | '/patient/upload'
+    | '/patient/records/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConnectRoute: typeof ConnectRoute
+  DoctorRoute: typeof DoctorRouteWithChildren
+  PatientRoute: typeof PatientRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/patient': {
+      id: '/patient'
+      path: '/patient'
+      fullPath: '/patient'
+      preLoaderRoute: typeof PatientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/doctor': {
+      id: '/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof DoctorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect': {
+      id: '/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof ConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +256,151 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/patient/upload': {
+      id: '/patient/upload'
+      path: '/upload'
+      fullPath: '/patient/upload'
+      preLoaderRoute: typeof PatientUploadRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/records': {
+      id: '/patient/records'
+      path: '/records'
+      fullPath: '/patient/records'
+      preLoaderRoute: typeof PatientRecordsRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/profile': {
+      id: '/patient/profile'
+      path: '/profile'
+      fullPath: '/patient/profile'
+      preLoaderRoute: typeof PatientProfileRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/dashboard': {
+      id: '/patient/dashboard'
+      path: '/dashboard'
+      fullPath: '/patient/dashboard'
+      preLoaderRoute: typeof PatientDashboardRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/audit': {
+      id: '/patient/audit'
+      path: '/audit'
+      fullPath: '/patient/audit'
+      preLoaderRoute: typeof PatientAuditRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/access': {
+      id: '/patient/access'
+      path: '/access'
+      fullPath: '/patient/access'
+      preLoaderRoute: typeof PatientAccessRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/doctor/request': {
+      id: '/doctor/request'
+      path: '/request'
+      fullPath: '/doctor/request'
+      preLoaderRoute: typeof DoctorRequestRouteImport
+      parentRoute: typeof DoctorRoute
+    }
+    '/doctor/records': {
+      id: '/doctor/records'
+      path: '/records'
+      fullPath: '/doctor/records'
+      preLoaderRoute: typeof DoctorRecordsRouteImport
+      parentRoute: typeof DoctorRoute
+    }
+    '/doctor/profile': {
+      id: '/doctor/profile'
+      path: '/profile'
+      fullPath: '/doctor/profile'
+      preLoaderRoute: typeof DoctorProfileRouteImport
+      parentRoute: typeof DoctorRoute
+    }
+    '/doctor/notifications': {
+      id: '/doctor/notifications'
+      path: '/notifications'
+      fullPath: '/doctor/notifications'
+      preLoaderRoute: typeof DoctorNotificationsRouteImport
+      parentRoute: typeof DoctorRoute
+    }
+    '/doctor/dashboard': {
+      id: '/doctor/dashboard'
+      path: '/dashboard'
+      fullPath: '/doctor/dashboard'
+      preLoaderRoute: typeof DoctorDashboardRouteImport
+      parentRoute: typeof DoctorRoute
+    }
+    '/patient/records/$id': {
+      id: '/patient/records/$id'
+      path: '/$id'
+      fullPath: '/patient/records/$id'
+      preLoaderRoute: typeof PatientRecordsIdRouteImport
+      parentRoute: typeof PatientRecordsRoute
+    }
   }
 }
 
+interface DoctorRouteChildren {
+  DoctorDashboardRoute: typeof DoctorDashboardRoute
+  DoctorNotificationsRoute: typeof DoctorNotificationsRoute
+  DoctorProfileRoute: typeof DoctorProfileRoute
+  DoctorRecordsRoute: typeof DoctorRecordsRoute
+  DoctorRequestRoute: typeof DoctorRequestRoute
+}
+
+const DoctorRouteChildren: DoctorRouteChildren = {
+  DoctorDashboardRoute: DoctorDashboardRoute,
+  DoctorNotificationsRoute: DoctorNotificationsRoute,
+  DoctorProfileRoute: DoctorProfileRoute,
+  DoctorRecordsRoute: DoctorRecordsRoute,
+  DoctorRequestRoute: DoctorRequestRoute,
+}
+
+const DoctorRouteWithChildren =
+  DoctorRoute._addFileChildren(DoctorRouteChildren)
+
+interface PatientRecordsRouteChildren {
+  PatientRecordsIdRoute: typeof PatientRecordsIdRoute
+}
+
+const PatientRecordsRouteChildren: PatientRecordsRouteChildren = {
+  PatientRecordsIdRoute: PatientRecordsIdRoute,
+}
+
+const PatientRecordsRouteWithChildren = PatientRecordsRoute._addFileChildren(
+  PatientRecordsRouteChildren,
+)
+
+interface PatientRouteChildren {
+  PatientAccessRoute: typeof PatientAccessRoute
+  PatientAuditRoute: typeof PatientAuditRoute
+  PatientDashboardRoute: typeof PatientDashboardRoute
+  PatientProfileRoute: typeof PatientProfileRoute
+  PatientRecordsRoute: typeof PatientRecordsRouteWithChildren
+  PatientUploadRoute: typeof PatientUploadRoute
+}
+
+const PatientRouteChildren: PatientRouteChildren = {
+  PatientAccessRoute: PatientAccessRoute,
+  PatientAuditRoute: PatientAuditRoute,
+  PatientDashboardRoute: PatientDashboardRoute,
+  PatientProfileRoute: PatientProfileRoute,
+  PatientRecordsRoute: PatientRecordsRouteWithChildren,
+  PatientUploadRoute: PatientUploadRoute,
+}
+
+const PatientRouteWithChildren =
+  PatientRoute._addFileChildren(PatientRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConnectRoute: ConnectRoute,
+  DoctorRoute: DoctorRouteWithChildren,
+  PatientRoute: PatientRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
