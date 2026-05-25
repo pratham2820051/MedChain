@@ -90,8 +90,8 @@ export async function uploadToIPFS(
     throw new Error("Pinata JWT not configured. Add VITE_PINATA_JWT to your .env file.");
   }
 
-  // Validate before uploading
-  validateFile(file);
+  // Note: validation is done before encryption in the upload page.
+  // Do NOT validate here — encrypted files are always application/octet-stream.
 
   // Build multipart form
   const formData = new FormData();
