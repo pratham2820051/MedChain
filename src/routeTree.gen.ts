@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientUploadRouteImport } from './routes/patient.upload'
 import { Route as PatientRecordsRouteImport } from './routes/patient.records'
 import { Route as PatientDashboardRouteImport } from './routes/patient.dashboard'
+import { Route as PatientAccessRouteImport } from './routes/patient.access'
 import { Route as PatientRecordsIdRouteImport } from './routes/patient.records.$id'
 
 const PatientRoute = PatientRouteImport.update({
@@ -47,6 +48,11 @@ const PatientDashboardRoute = PatientDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => PatientRoute,
 } as any)
+const PatientAccessRoute = PatientAccessRouteImport.update({
+  id: '/access',
+  path: '/access',
+  getParentRoute: () => PatientRoute,
+} as any)
 const PatientRecordsIdRoute = PatientRecordsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/patient': typeof PatientRouteWithChildren
+  '/patient/access': typeof PatientAccessRoute
   '/patient/dashboard': typeof PatientDashboardRoute
   '/patient/records': typeof PatientRecordsRouteWithChildren
   '/patient/upload': typeof PatientUploadRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/patient': typeof PatientRouteWithChildren
+  '/patient/access': typeof PatientAccessRoute
   '/patient/dashboard': typeof PatientDashboardRoute
   '/patient/records': typeof PatientRecordsRouteWithChildren
   '/patient/upload': typeof PatientUploadRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/patient': typeof PatientRouteWithChildren
+  '/patient/access': typeof PatientAccessRoute
   '/patient/dashboard': typeof PatientDashboardRoute
   '/patient/records': typeof PatientRecordsRouteWithChildren
   '/patient/upload': typeof PatientUploadRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/connect'
     | '/patient'
+    | '/patient/access'
     | '/patient/dashboard'
     | '/patient/records'
     | '/patient/upload'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/connect'
     | '/patient'
+    | '/patient/access'
     | '/patient/dashboard'
     | '/patient/records'
     | '/patient/upload'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/connect'
     | '/patient'
+    | '/patient/access'
     | '/patient/dashboard'
     | '/patient/records'
     | '/patient/upload'
@@ -161,6 +173,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientDashboardRouteImport
       parentRoute: typeof PatientRoute
     }
+    '/patient/access': {
+      id: '/patient/access'
+      path: '/access'
+      fullPath: '/patient/access'
+      preLoaderRoute: typeof PatientAccessRouteImport
+      parentRoute: typeof PatientRoute
+    }
     '/patient/records/$id': {
       id: '/patient/records/$id'
       path: '/$id'
@@ -184,12 +203,14 @@ const PatientRecordsRouteWithChildren = PatientRecordsRoute._addFileChildren(
 )
 
 interface PatientRouteChildren {
+  PatientAccessRoute: typeof PatientAccessRoute
   PatientDashboardRoute: typeof PatientDashboardRoute
   PatientRecordsRoute: typeof PatientRecordsRouteWithChildren
   PatientUploadRoute: typeof PatientUploadRoute
 }
 
 const PatientRouteChildren: PatientRouteChildren = {
+  PatientAccessRoute: PatientAccessRoute,
   PatientDashboardRoute: PatientDashboardRoute,
   PatientRecordsRoute: PatientRecordsRouteWithChildren,
   PatientUploadRoute: PatientUploadRoute,
