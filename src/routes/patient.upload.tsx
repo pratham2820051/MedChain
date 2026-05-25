@@ -98,25 +98,14 @@ function UploadPage() {
 
       let ipfsCid = "QmDummyCID123";
       let ipfsGatewayUrl = "";
-
-      // ── Step 3: Upload encrypted file to IPFS ─────────────────────────────
       setStep("ipfs");
-      try {
-        const result = await uploadToIPFS(encryptedFile, `${name} [encrypted]`, (pct) => {
-          setProgress(30 + Math.round(pct * 0.45));
-        });
-        ipfsCid = result.cid;
-        ipfsGatewayUrl = result.gatewayUrl;
-        setCid(ipfsCid);
-        toast.success(`Encrypted file pinned to IPFS ✓`);
-      } catch (ipfsErr: unknown) {
-        const msg = (ipfsErr as Error).message;
-        if (msg.includes("Pinata JWT not configured")) {
-          toast.warning("Pinata not configured — using dummy CID.");
-        } else {
-          throw new Error(`IPFS upload failed: ${msg}`);
-        }
-      }
+      const ipfsResult = await uploadToIPFS(encryptedFile, `${name} [encrypted]`, (pct) => {
+        setProgress(30 + Math.round(pct * 0.45));
+      });
+      ipfsCid = ipfsResult.cid;
+      ipfsGatewayUrl = ipfsResult.gatewayUrl;
+      setCid(ipfsCid);
+      toast.success(`Encrypted file pinned to IPFS ✓`);
 
       setProgress(80);
 
