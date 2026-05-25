@@ -72,42 +72,20 @@ interface StoreState {
   profile: Profile;
 }
 
-const KEY = "medchain_state_v1";
-
-const randomAddr = () =>
-  "0x" + Array.from({ length: 40 }, () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
+const KEY = "medchain_state_v2"; // bumped from v1 to clear old dummy data
 
 const txId = () => "0x" + Math.random().toString(16).slice(2, 10) + Math.random().toString(16).slice(2, 10);
 
 const seed = (): StoreState => {
-  const patient = "0xA1b2C3d4E5f6789012345678901234567890aBcD";
-  const doctor = "0xDoC7E89012345678901234567890123456abcdEF";
   return {
     wallet: null,
     role: null,
-    records: [
-      { id: "r1", name: "Annual Blood Panel", type: "Lab Report", uploadDate: "2025-04-12", status: "Active", ownerAddress: patient, description: "Routine annual lab work." },
-      { id: "r2", name: "Chest X-Ray", type: "X-Ray", uploadDate: "2025-03-02", status: "Active", ownerAddress: patient, description: "Follow-up imaging." },
-      { id: "r3", name: "Amoxicillin Prescription", type: "Prescription", uploadDate: "2025-02-18", status: "Active", ownerAddress: patient },
-      { id: "r4", name: "Brain MRI", type: "MRI", uploadDate: "2024-12-01", status: "Active", ownerAddress: patient },
-    ],
-    grants: [
-      { id: "g1", doctorAddress: doctor, patientAddress: patient, expiryDate: "2026-01-01", status: "Active" },
-    ],
-    audit: [
-      { id: "a1", eventType: "Upload", walletAddress: patient, timestamp: "2025-04-12T10:23:00Z", txId: txId(), status: "Success" },
-      { id: "a2", eventType: "Grant", walletAddress: patient, timestamp: "2025-04-13T08:11:00Z", txId: txId(), status: "Success" },
-      { id: "a3", eventType: "View", walletAddress: doctor, timestamp: "2025-04-14T14:02:00Z", txId: txId(), status: "Success" },
-      { id: "a4", eventType: "Download", walletAddress: doctor, timestamp: "2025-04-15T09:30:00Z", txId: txId(), status: "Success" },
-    ],
-    requests: [
-      { id: "q1", patientAddress: patient, doctorAddress: doctor, requestDate: "2025-04-10", status: "Approved" },
-    ],
-    notifications: [
-      { id: "n1", type: "Access Approved", message: "Patient 0xA1b2…aBcD approved access.", timestamp: "2025-04-13T08:11:00Z", read: false },
-      { id: "n2", type: "New Records Available", message: "New lab report shared.", timestamp: "2025-04-12T10:23:00Z", read: false },
-    ],
-    profile: { address: patient, role: "patient", name: "Alex Morgan", email: "alex@example.com", phone: "+1 555 0100" },
+    records: [],
+    grants: [],
+    audit: [],
+    requests: [],
+    notifications: [],
+    profile: { address: "", role: "patient", name: "" },
   };
 };
 
@@ -161,9 +139,9 @@ export function useStore<T>(selector: (s: StoreState) => T): T {
 // ---- Placeholder API functions ----
 
 export async function connectWallet(): Promise<string> {
-  await new Promise((r) => setTimeout(r, 600));
-  const addr = getState().wallet ?? randomAddr();
-  setState((s) => ({ ...s, wallet: addr }));
+  // Legacy mock — real connection is handled by WalletContext/MetaMask
+  const addr = getState().wallet ?? "";
+  if (addr) setState((s) => ({ ...s, wallet: addr }));
   return addr;
 }
 
@@ -179,9 +157,6 @@ export function setRole(role: UserRole) {
       ...s.profile,
       role,
       address: s.wallet ?? s.profile.address,
-      ...(role === "doctor"
-        ? { name: s.profile.name ?? "Dr. Sam Patel", specialization: "Internal Medicine", hospital: "Northview General" }
-        : {}),
     },
   }));
 }
