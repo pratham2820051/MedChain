@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useStore, requestAccess, shortAddr } from "@/lib/mock-store";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/doctor/request")({
   head: () => ({ meta: [{ title: "Request Access — MedChain" }] }),
@@ -21,7 +22,11 @@ function RequestPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addr) return;
+    if (!addr) { toast.error("Patient address required."); return; }
+    if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) {
+      toast.error("Please enter a valid patient wallet address (0x followed by 40 hex characters).");
+      return;
+    }
     setBusy(true);
     try {
       await requestAccess(addr);
@@ -38,9 +43,18 @@ function RequestPage() {
           <form onSubmit={submit} className="space-y-4">
             <div>
               <Label htmlFor="addr">Patient Wallet Address</Label>
-              <Input id="addr" value={addr} onChange={(e) => setAddr(e.target.value)} placeholder="0x…" className="font-mono" />
+              <Input id="addr" value={addr} onChange={(e) => setAddr(e.target.value)} placeholder="0x…" className="font-mono" required />
             </div>
-            <Button type="submit" disabled={busy} className="bg-hero text-primary-foreground">Request Access</Button>
+            <Button type="submit" disabled={busy} className="bg-hero text-primary-foreground">
+              {busy ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Requesting Access…
+                </>
+              ) : (
+                "Request Access"
+              )}
+            </Button>
           </form>
         </Card>
         <Card className="glass p-6">

@@ -141,21 +141,121 @@
   * {
     border-color: var(--color-border);
   }
-
+  * { border-color: var(--color-border); }
+  html { font-family: "Inter", system-ui, sans-serif; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+@keyframes blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(40px, -30px) scale(1.08); }
+  66%       { transform: translate(-25px, 20px) scale(0.95); }
+}
+@keyframes shimmer {
+  from { background-position: 200% center; }
+  to   { background-position: -200% center; }
+}
+@keyframes float-up {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 oklch(0.52 0.22 248 / 0.4); }
+  70%  { box-shadow: 0 0 0 12px oklch(0.52 0.22 248 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.52 0.22 248 / 0); }
 }
 
 @layer utilities {
   .glass {
-    background: color-mix(in oklab, var(--card) 70%, transparent);
-    backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
     box-shadow: var(--shadow-glass);
   }
-  .bg-hero { background: var(--gradient-hero); }
-  .bg-soft { background: var(--gradient-soft); }
+  .bg-hero   { background: var(--gradient-hero); }
+  .bg-soft   { background: var(--gradient-soft); }
+  .bg-subtle { background: var(--gradient-subtle); }
   .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-lift { box-shadow: var(--shadow-lift); }
+
+  .gradient-text {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    display: inline-block;
+  }
+  .shimmer-text {
+    background: linear-gradient(
+      90deg,
+      oklch(0.45 0.25 252),
+      oklch(0.72 0.17 168),
+      oklch(0.58 0.2 218),
+      oklch(0.45 0.25 252)
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+  .feature-card {
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.3s ease,
+                border-color 0.3s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-7px);
+    box-shadow: var(--shadow-lift);
+    border-color: oklch(0.52 0.22 248 / 0.3);
+  }
+  .float-anim { animation: float-up 4s ease-in-out infinite; }
+  .blob {
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.3;
+    animation: blob-drift 12s ease-in-out infinite;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .blob-2 { animation-delay: -4s; }
+  .blob-3 { animation-delay: -8s; }
+  .fade-in-up { animation: fade-in-up 0.7s ease both; }
+  .delay-100  { animation-delay: 0.1s; }
+  .delay-200  { animation-delay: 0.2s; }
+  .delay-300  { animation-delay: 0.3s; }
+  .delay-400  { animation-delay: 0.4s; }
+  .nav-link { position: relative; transition: color 0.2s ease; }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0;
+    width: 0; height: 2px;
+    background: var(--gradient-hero);
+    border-radius: 99px;
+    transition: width 0.25s ease;
+  }
+  .nav-link:hover::after { width: 100%; }
+  .icon-ring {
+    background: linear-gradient(135deg, oklch(0.52 0.22 248 / 0.12), oklch(0.76 0.16 168 / 0.12));
+    border: 1px solid oklch(0.52 0.22 248 / 0.18);
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .feature-card:hover .icon-ring {
+    background: linear-gradient(135deg, oklch(0.52 0.22 248 / 0.2), oklch(0.76 0.16 168 / 0.2));
+    transform: scale(1.1);
+  }
+  .pulse-ring { animation: pulse-ring 2s ease-out infinite; }
 }

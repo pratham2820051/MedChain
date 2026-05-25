@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader, StatsCard } from "@/components/stats-card";
-import { useStore } from "@/lib/mock-store";
+import { useStore, shortAddr } from "@/lib/mock-store";
 import { Users, Clock, FileText, Activity } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -29,16 +29,21 @@ function DoctorDashboard() {
           <h2 className="font-semibold">Recent Activity</h2>
           <Link to="/doctor/records" className="text-sm text-primary hover:underline">View records</Link>
         </div>
-        <ul className="divide-y divide-border">
+        <ul className="divide-y divide-border/40">
           {audit.slice(0, 6).map((a) => (
             <li key={a.id} className="py-3 flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">{a.eventType}</div>
-                <div className="text-xs text-muted-foreground font-mono">{a.walletAddress.slice(0, 14)}…</div>
+                <div className="text-xs text-muted-foreground font-mono">{shortAddr(a.walletAddress)}</div>
               </div>
               <span className="text-xs text-muted-foreground">{new Date(a.timestamp).toLocaleString()}</span>
             </li>
           ))}
+          {audit.length === 0 && (
+            <li className="py-8 text-center text-sm text-muted-foreground">
+              No recent activity logs.
+            </li>
+          )}
         </ul>
       </Card>
     </div>
