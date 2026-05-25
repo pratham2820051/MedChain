@@ -3,8 +3,9 @@ import { PageHeader } from "@/components/stats-card";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStore, grantAccess, shortAddr } from "@/lib/mock-store";
-import { openIpfsFile, downloadFromIPFS, isRealCid } from "@/services/ipfsService";
-import { Download, Share2, History, FileText, Loader2, ExternalLink, Link2 } from "lucide-react";
+import { isRealCid, buildGatewayUrl } from "@/services/ipfsService";
+import { decryptFromIPFS, hasKey, getKey } from "@/services/encryptionService";
+import { Download, Share2, History, FileText, Loader2, ExternalLink, Link2, ShieldCheck, ShieldOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
@@ -29,7 +30,9 @@ function RecordDetail() {
   const [docAddr, setDocAddr] = useState("");
   const [expiry, setExpiry] = useState("");
   const [sharing, setSharing] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [decrypting, setDecrypting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewMime, setPreviewMime] = useState<string>("");
 
   const handleShare = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,19 +55,64 @@ function RecordDetail() {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDecryptAndView = async () => {
     if (!record?.ipfsCid || !isRealCid(record.ipfsCid)) {
       toast.error("No IPFS file attached to this record.");
       return;
     }
-    setDownloading(true);
+    if (!record.isEncrypted) {
+      // Not encrypted — open directly
+      window.open(buildGatewayUrl(record.ipfsCid), "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (!hasKey(record.id)) {
+      toast.error("Unable to decrypt — encryption key not found on this device.");
+      return;
+    }
+    setDecrypting(true);
     try {
-      await downloadFromIPFS(record.ipfsCid, record.fileName ?? record.name);
+      const gatewayUrl = record.ipfsGatewayUrl || buildGatewayUrl(record.ipfsCid);
+      const { objectUrl, mimeType } = await decryptFromIPFS(
+        record.ipfsCid,
+        record.id,
+        record.fileName ?? record.name,
+        gatewayUrl
+      );
+      setPreviewUrl(objectUrl);
+      setPreviewMime(mimeType);
+      toast.success("File decrypted successfully");
+    } catch (err: unknown) {
+      toast.error((err as Error).message);
+    } finally {
+      setDecrypting(false);
+    }
+  };
+
+  const handleDecryptAndDownload = async () => {
+    if (!record?.ipfsCid || !isRealCid(record.ipfsCid)) {
+      toast.error("No IPFS file attached to this record.");
+      return;
+    }
+    setDecrypting(true);
+    try {
+      const gatewayUrl = record.ipfsGatewayUrl || buildGatewayUrl(record.ipfsCid);
+      const { blob } = record.isEncrypted
+        ? await decryptFromIPFS(record.ipfsCid, record.id, record.fileName ?? record.name, gatewayUrl)
+        : { blob: await fetch(gatewayUrl).then((r) => r.blob()) };
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = record.fileName ?? record.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
       toast.success("Download started");
     } catch (err: unknown) {
       toast.error((err as Error).message);
     } finally {
-      setDownloading(false);
+      setDecrypting(false);
     }
   };
 
@@ -78,6 +126,7 @@ function RecordDetail() {
   }
 
   const hasCid = isRealCid(record.ipfsCid ?? "");
+  const keyAvailable = hasKey(record.id);
 
   return (
     <div className="max-w-3xl">
@@ -85,29 +134,28 @@ function RecordDetail() {
         title={record.name}
         description={`${record.type} · uploaded ${record.uploadDate}`}
         action={
-          <div className="flex gap-2">
-            {/* Open in IPFS */}
+          <div className="flex gap-2 flex-wrap">
+            {/* View / Decrypt */}
             {hasCid && (
               <Button
                 variant="outline"
-                onClick={() => {
-                  try { openIpfsFile(record.ipfsCid!); }
-                  catch (err: unknown) { toast.error((err as Error).message); }
-                }}
+                onClick={handleDecryptAndView}
+                disabled={decrypting}
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open File
+                {decrypting ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Decrypting…</>
+                ) : (
+                  <><Eye className="h-4 w-4 mr-2" />View File</>
+                )}
               </Button>
             )}
 
             {/* Download */}
-            <Button variant="outline" onClick={handleDownload} disabled={downloading}>
-              {downloading ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Downloading…</>
-              ) : (
-                <><Download className="h-4 w-4 mr-2" />Download</>
-              )}
-            </Button>
+            {hasCid && (
+              <Button variant="outline" onClick={handleDecryptAndDownload} disabled={decrypting}>
+                <Download className="h-4 w-4 mr-2" />Download
+              </Button>
+            )}
 
             {/* Share */}
             <Dialog open={open} onOpenChange={setOpen}>
@@ -120,37 +168,32 @@ function RecordDetail() {
                 <DialogHeader>
                   <DialogTitle>Share Medical Record</DialogTitle>
                   <DialogDescription>
-                    Authorize a clinician to access this record on the blockchain.
+                    Grant a doctor blockchain access to this record.
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleShare} className="space-y-4 py-2">
                   <div className="space-y-1">
                     <Label htmlFor="doc-addr">Doctor Wallet Address</Label>
-                    <Input
-                      id="doc-addr"
-                      placeholder="0x..."
-                      value={docAddr}
-                      onChange={(e) => setDocAddr(e.target.value)}
-                      className="font-mono text-sm"
-                      required
-                    />
+                    <Input id="doc-addr" placeholder="0x..." value={docAddr} onChange={(e) => setDocAddr(e.target.value)} className="font-mono text-sm" required />
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="expiry">Expiry Date</Label>
-                    <Input
-                      id="expiry"
-                      type="date"
-                      value={expiry}
-                      onChange={(e) => setExpiry(e.target.value)}
-                      required
-                    />
+                    <Input id="expiry" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} required />
                   </div>
+                  {/* Show AES key for doctor to use */}
+                  {record.isEncrypted && keyAvailable && (
+                    <div className="space-y-1">
+                      <Label>Decryption Key (share with doctor)</Label>
+                      <div className="rounded-lg bg-secondary/40 p-2 font-mono text-xs break-all select-all">
+                        {getKey(record.id)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Doctor needs this key to decrypt the file.</p>
+                    </div>
+                  )}
                   <DialogFooter className="pt-4">
                     <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
                     <Button type="submit" disabled={sharing} className="bg-hero text-primary-foreground">
-                      {sharing ? (
-                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sharing...</>
-                      ) : "Grant Access"}
+                      {sharing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sharing...</> : "Grant Access"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -171,13 +214,29 @@ function RecordDetail() {
             <Info label="Upload Date" value={record.uploadDate} />
             <Info label="Status" value={record.status} />
             <Info label="File" value={record.fileName ?? "—"} />
-            <div className="sm:col-span-2">
-              <Info label="Description" value={record.description ?? "—"} />
-            </div>
+            <div className="sm:col-span-2"><Info label="Description" value={record.description ?? "—"} /></div>
           </div>
         </div>
 
-        {/* IPFS CID section */}
+        {/* Encryption status */}
+        <div className="mt-4 flex items-center gap-2 text-xs">
+          {record.isEncrypted ? (
+            <>
+              <ShieldCheck className="h-4 w-4 text-accent" />
+              <span className="text-accent-foreground font-medium">AES-256 Encrypted</span>
+              {keyAvailable
+                ? <span className="text-muted-foreground">· Decryption key available on this device</span>
+                : <span className="text-destructive">· Key not found on this device</span>}
+            </>
+          ) : (
+            <>
+              <ShieldOff className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Not encrypted (uploaded before Phase 5)</span>
+            </>
+          )}
+        </div>
+
+        {/* IPFS CID */}
         {hasCid && (
           <div className="mt-5 pt-5 border-t border-border/40">
             <div className="flex items-center gap-2 mb-2">
@@ -188,20 +247,35 @@ function RecordDetail() {
               <div className="text-xs text-muted-foreground uppercase tracking-wide">CID</div>
               <div className="font-mono text-xs break-all">{record.ipfsCid}</div>
               {record.ipfsGatewayUrl && (
-                <a
-                  href={record.ipfsGatewayUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
-                >
+                <a href={record.ipfsGatewayUrl} target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
                   <ExternalLink className="h-3 w-3" />
-                  View on IPFS Gateway
+                  View raw encrypted file on IPFS
                 </a>
               )}
             </div>
           </div>
         )}
       </Card>
+
+      {/* Inline preview */}
+      {previewUrl && (
+        <Card className="glass p-4 mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-sm">Decrypted Preview</h2>
+            <Button size="sm" variant="ghost" onClick={() => { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }}>
+              Close
+            </Button>
+          </div>
+          {previewMime === "application/pdf" ? (
+            <iframe src={previewUrl} className="w-full h-[600px] rounded-lg border border-border" title="PDF Preview" />
+          ) : previewMime.startsWith("image/") ? (
+            <img src={previewUrl} alt="Medical record" className="max-w-full rounded-lg border border-border" />
+          ) : (
+            <p className="text-sm text-muted-foreground">Preview not available for this file type. Use Download instead.</p>
+          )}
+        </Card>
+      )}
 
       {/* Access history */}
       <Card className="glass p-6 mt-4">
@@ -216,9 +290,7 @@ function RecordDetail() {
               <span className="text-muted-foreground text-xs">{new Date(a.timestamp).toLocaleString()}</span>
             </li>
           ))}
-          {audit.length === 0 && (
-            <li className="text-sm text-muted-foreground py-2">No access events yet.</li>
-          )}
+          {audit.length === 0 && <li className="text-sm text-muted-foreground py-2">No access events yet.</li>}
         </ul>
       </Card>
     </div>

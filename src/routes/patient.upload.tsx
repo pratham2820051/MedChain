@@ -11,9 +11,10 @@ import { useState } from "react";
 import { uploadRecord as mockUpload, type RecordType } from "@/lib/mock-store";
 import { uploadRecord as chainUpload, parseContractError } from "@/services/medchainService";
 import { uploadToIPFS, validateFile, ALLOWED_EXTENSIONS, MAX_FILE_SIZE_BYTES } from "@/services/ipfsService";
+import { encryptMedicalFile } from "@/services/encryptionService";
 import { useWallet } from "@/hooks/useWallet";
 import { toast } from "sonner";
-import { UploadCloud, Loader2, FileCheck2, Link2 } from "lucide-react";
+import { UploadCloud, Loader2, FileCheck2, Link2, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/patient/upload")({
   head: () => ({ meta: [{ title: "Upload Record — MedChain" }] }),
@@ -22,13 +23,13 @@ export const Route = createFileRoute("/patient/upload")({
 
 const types: RecordType[] = ["Lab Report", "Prescription", "Scan", "X-Ray", "MRI", "Other"];
 
-// Upload steps shown in the progress area
-type UploadStep = "idle" | "validating" | "ipfs" | "blockchain" | "done";
+type UploadStep = "idle" | "validating" | "encrypting" | "ipfs" | "blockchain" | "done";
 
 const STEP_LABELS: Record<UploadStep, string> = {
   idle: "",
   validating: "Validating file…",
-  ipfs: "Uploading to IPFS via Pinata…",
+  encrypting: "Encrypting file with AES-256…",
+  ipfs: "Uploading encrypted file to IPFS…",
   blockchain: "Saving CID to blockchain…",
   done: "Upload complete!",
 };
@@ -66,31 +67,38 @@ function UploadPage() {
     setProgress(0);
     setCid(null);
 
+    // Generate a temp record ID for key storage
+    const tempId = "r" + Math.random().toString(36).slice(2, 8);
+
     try {
       // ── Step 1: Validate ──────────────────────────────────────────────────
       setStep("validating");
       validateFile(file);
       setProgress(5);
 
+      // ── Step 2: Encrypt ───────────────────────────────────────────────────
+      setStep("encrypting");
+      const { encryptedFile } = await encryptMedicalFile(file, tempId);
+      setProgress(30);
+      toast.success("File encrypted with AES-256 ✓");
+
       let ipfsCid = "QmDummyCID123";
       let ipfsGatewayUrl = "";
 
-      // ── Step 2: Upload to IPFS ────────────────────────────────────────────
+      // ── Step 3: Upload encrypted file to IPFS ─────────────────────────────
       setStep("ipfs");
       try {
-        const result = await uploadToIPFS(file, name, (pct) => {
-          // Map IPFS progress (0–100) to overall progress (5–75)
-          setProgress(5 + Math.round(pct * 0.7));
+        const result = await uploadToIPFS(encryptedFile, `${name} [encrypted]`, (pct) => {
+          setProgress(30 + Math.round(pct * 0.45));
         });
         ipfsCid = result.cid;
         ipfsGatewayUrl = result.gatewayUrl;
         setCid(ipfsCid);
-        toast.success(`File pinned to IPFS — CID: ${ipfsCid.slice(0, 16)}…`);
+        toast.success(`Encrypted file pinned to IPFS ✓`);
       } catch (ipfsErr: unknown) {
         const msg = (ipfsErr as Error).message;
         if (msg.includes("Pinata JWT not configured")) {
-          // Graceful fallback — continue with dummy CID
-          toast.warning("Pinata not configured — using dummy CID for demo.");
+          toast.warning("Pinata not configured — using dummy CID.");
         } else {
           throw new Error(`IPFS upload failed: ${msg}`);
         }
@@ -98,7 +106,7 @@ function UploadPage() {
 
       setProgress(80);
 
-      // ── Step 3: Save to local store ───────────────────────────────────────
+      // ── Step 4: Save to local store ───────────────────────────────────────
       await mockUpload({
         name,
         type,
@@ -106,15 +114,16 @@ function UploadPage() {
         description: desc,
         ipfsCid,
         ipfsGatewayUrl,
+        isEncrypted: true,
       });
 
       setProgress(85);
 
-      // ── Step 4: Save CID to blockchain ────────────────────────────────────
+      // ── Step 5: Save CID to blockchain ────────────────────────────────────
       if (isConnected && isCorrectNetwork) {
         setStep("blockchain");
         await chainUpload(type, ipfsCid);
-        toast.success("CID saved to Sepolia blockchain");
+        toast.success("CID saved to Sepolia blockchain ✓");
       } else {
         toast.info("Connect MetaMask on Sepolia to save CID on-chain.");
       }
@@ -136,10 +145,16 @@ function UploadPage() {
     <div className="max-w-2xl">
       <PageHeader
         title="Upload Medical Record"
-        description="Files are stored on IPFS. Only the CID reference is saved on blockchain."
+        description="Files are AES-256 encrypted before being stored on IPFS."
       />
       <Card className="glass p-6">
         <form onSubmit={submit} className="space-y-5">
+
+          {/* Encryption badge */}
+          <div className="flex items-center gap-2 rounded-xl bg-accent/10 border border-accent/30 px-3 py-2 text-xs text-accent-foreground">
+            <ShieldCheck className="h-4 w-4 text-accent shrink-0" />
+            <span>Files are encrypted with AES-256 before upload. Only you can decrypt them.</span>
+          </div>
 
           {/* File drop zone */}
           <div>
@@ -172,13 +187,7 @@ function UploadPage() {
           {/* Record name */}
           <div>
             <Label htmlFor="name">Record Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Annual Blood Panel"
-              required
-            />
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Annual Blood Panel" required />
           </div>
 
           {/* Record type */}
@@ -186,9 +195,7 @@ function UploadPage() {
             <Label>Record Type</Label>
             <Select value={type} onValueChange={(v) => setType(v as RecordType)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {types.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{types.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
 
@@ -198,13 +205,13 @@ function UploadPage() {
             <Textarea id="desc" value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} />
           </div>
 
-          {/* Status hints */}
+          {/* Network status */}
           <div className="space-y-1">
             {isConnected && isCorrectNetwork && (
-              <p className="text-xs text-muted-foreground">✅ MetaMask connected on Sepolia — CID will be saved on-chain.</p>
+              <p className="text-xs text-muted-foreground">✅ MetaMask on Sepolia — CID will be saved on-chain.</p>
             )}
             {isConnected && !isCorrectNetwork && (
-              <p className="text-xs text-yellow-600 dark:text-yellow-400">⚠️ Wrong network — switch to Sepolia to save CID on-chain.</p>
+              <p className="text-xs text-yellow-600 dark:text-yellow-400">⚠️ Wrong network — switch to Sepolia.</p>
             )}
             {!isConnected && (
               <p className="text-xs text-muted-foreground">Connect MetaMask on Sepolia to save CID on-chain.</p>
@@ -224,7 +231,7 @@ function UploadPage() {
             <div className="rounded-xl border border-accent/40 bg-accent/10 p-3 flex items-start gap-2 text-xs">
               <Link2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
               <div>
-                <div className="font-medium text-accent-foreground">IPFS CID Generated</div>
+                <div className="font-medium text-accent-foreground">Encrypted file pinned to IPFS</div>
                 <div className="font-mono text-muted-foreground break-all mt-0.5">{cid}</div>
               </div>
             </div>
@@ -232,22 +239,14 @@ function UploadPage() {
 
           {/* Actions */}
           <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate({ to: "/patient/dashboard" })}
-              disabled={busy}
-            >
+            <Button type="button" variant="outline" onClick={() => navigate({ to: "/patient/dashboard" })} disabled={busy}>
               Cancel
             </Button>
             <Button type="submit" disabled={busy} className="bg-hero text-primary-foreground">
               {busy ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {STEP_LABELS[step] || "Uploading…"}
-                </>
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{STEP_LABELS[step] || "Uploading…"}</>
               ) : (
-                "Upload Record"
+                "Encrypt & Upload"
               )}
             </Button>
           </div>

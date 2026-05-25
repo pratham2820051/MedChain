@@ -13,8 +13,9 @@ export interface MedRecord {
   status: "Active" | "Archived";
   ownerAddress: string;
   fileName?: string;
-  ipfsCid?: string;       // real IPFS CID from Phase 4
+  ipfsCid?: string;        // real IPFS CID from Phase 4
   ipfsGatewayUrl?: string; // full gateway URL
+  isEncrypted?: boolean;   // Phase 5 — true if file was AES encrypted
 }
 
 export interface AccessGrant {
@@ -185,13 +186,13 @@ export function setRole(role: UserRole) {
   }));
 }
 
-export async function uploadRecord(input: { name: string; type: RecordType; fileName: string; description?: string; ipfsCid?: string; ipfsGatewayUrl?: string }) {
+export async function uploadRecord(input: { name: string; type: RecordType; fileName: string; description?: string; ipfsCid?: string; ipfsGatewayUrl?: string; isEncrypted?: boolean }) {
   await new Promise((r) => setTimeout(r, 800));
   const id = "r" + Math.random().toString(36).slice(2, 8);
   setState((s) => ({
     ...s,
     records: [
-      { id, name: input.name, type: input.type, fileName: input.fileName, description: input.description, uploadDate: new Date().toISOString().slice(0, 10), status: "Active", ownerAddress: s.wallet ?? s.profile.address, ipfsCid: input.ipfsCid, ipfsGatewayUrl: input.ipfsGatewayUrl },
+      { id, name: input.name, type: input.type, fileName: input.fileName, description: input.description, uploadDate: new Date().toISOString().slice(0, 10), status: "Active", ownerAddress: s.wallet ?? s.profile.address, ipfsCid: input.ipfsCid, ipfsGatewayUrl: input.ipfsGatewayUrl, isEncrypted: input.isEncrypted },
       ...s.records,
     ],
     audit: [
