@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientUploadRouteImport } from './routes/patient.upload'
 import { Route as PatientRecordsRouteImport } from './routes/patient.records'
 import { Route as PatientDashboardRouteImport } from './routes/patient.dashboard'
+import { Route as PatientRecordsIdRouteImport } from './routes/patient.records.$id'
 
 const PatientRoute = PatientRouteImport.update({
   id: '/patient',
@@ -46,22 +47,29 @@ const PatientDashboardRoute = PatientDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => PatientRoute,
 } as any)
+const PatientRecordsIdRoute = PatientRecordsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PatientRecordsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/patient': typeof PatientRouteWithChildren
   '/patient/dashboard': typeof PatientDashboardRoute
-  '/patient/records': typeof PatientRecordsRoute
+  '/patient/records': typeof PatientRecordsRouteWithChildren
   '/patient/upload': typeof PatientUploadRoute
+  '/patient/records/$id': typeof PatientRecordsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/patient': typeof PatientRouteWithChildren
   '/patient/dashboard': typeof PatientDashboardRoute
-  '/patient/records': typeof PatientRecordsRoute
+  '/patient/records': typeof PatientRecordsRouteWithChildren
   '/patient/upload': typeof PatientUploadRoute
+  '/patient/records/$id': typeof PatientRecordsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,8 +77,9 @@ export interface FileRoutesById {
   '/connect': typeof ConnectRoute
   '/patient': typeof PatientRouteWithChildren
   '/patient/dashboard': typeof PatientDashboardRoute
-  '/patient/records': typeof PatientRecordsRoute
+  '/patient/records': typeof PatientRecordsRouteWithChildren
   '/patient/upload': typeof PatientUploadRoute
+  '/patient/records/$id': typeof PatientRecordsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/patient/dashboard'
     | '/patient/records'
     | '/patient/upload'
+    | '/patient/records/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/patient/dashboard'
     | '/patient/records'
     | '/patient/upload'
+    | '/patient/records/$id'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/patient/dashboard'
     | '/patient/records'
     | '/patient/upload'
+    | '/patient/records/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,18 +161,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientDashboardRouteImport
       parentRoute: typeof PatientRoute
     }
+    '/patient/records/$id': {
+      id: '/patient/records/$id'
+      path: '/$id'
+      fullPath: '/patient/records/$id'
+      preLoaderRoute: typeof PatientRecordsIdRouteImport
+      parentRoute: typeof PatientRecordsRoute
+    }
   }
 }
 
+interface PatientRecordsRouteChildren {
+  PatientRecordsIdRoute: typeof PatientRecordsIdRoute
+}
+
+const PatientRecordsRouteChildren: PatientRecordsRouteChildren = {
+  PatientRecordsIdRoute: PatientRecordsIdRoute,
+}
+
+const PatientRecordsRouteWithChildren = PatientRecordsRoute._addFileChildren(
+  PatientRecordsRouteChildren,
+)
+
 interface PatientRouteChildren {
   PatientDashboardRoute: typeof PatientDashboardRoute
-  PatientRecordsRoute: typeof PatientRecordsRoute
+  PatientRecordsRoute: typeof PatientRecordsRouteWithChildren
   PatientUploadRoute: typeof PatientUploadRoute
 }
 
 const PatientRouteChildren: PatientRouteChildren = {
   PatientDashboardRoute: PatientDashboardRoute,
-  PatientRecordsRoute: PatientRecordsRoute,
+  PatientRecordsRoute: PatientRecordsRouteWithChildren,
   PatientUploadRoute: PatientUploadRoute,
 }
 
