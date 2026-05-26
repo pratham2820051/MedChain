@@ -116,7 +116,17 @@ function PatientRecords() {
     setDecrypting(true);
     try {
       const gatewayUrl = buildGatewayUrl(record.ipfsHash);
-      const fileName = `record-${decryptIndex + 1}`;
+      // Use record type to hint the file extension for MIME detection
+      const typeToExt: Record<string, string> = {
+        "Lab Report": "pdf",
+        "Prescription": "pdf",
+        "Scan": "jpg",
+        "X-Ray": "jpg",
+        "MRI": "jpg",
+        "Other": "pdf",
+      };
+      const ext = typeToExt[record.recordType] ?? "pdf";
+      const fileName = `record-${decryptIndex + 1}.${ext}`;
       const { objectUrl, mimeType } = await decryptWithKey(
         gatewayUrl,
         aesKeyInput.trim(),
@@ -145,7 +155,13 @@ function PatientRecords() {
     }
     const a = document.createElement("a");
     a.href = record.previewUrl;
-    a.download = `record-${index + 1}`;
+    // Use record type to guess extension
+    const ext = record.previewMime === "application/pdf" ? ".pdf"
+      : record.previewMime === "image/png" ? ".png"
+      : record.previewMime === "image/jpeg" ? ".jpg"
+      : record.previewMime?.includes("wordprocessing") ? ".docx"
+      : "";
+    a.download = `record-${index + 1}${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
