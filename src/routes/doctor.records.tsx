@@ -254,12 +254,16 @@ function PatientRecords() {
                     {r.previewUrl && (
                       <>
                         <Button
-                          size="icon"
-                          variant="ghost"
-                          title="View"
-                          onClick={() => window.open(r.previewUrl, "_blank")}
+                          size="sm"
+                          variant="outline"
+                          title="View inline below"
+                          onClick={() => {
+                            const el = document.getElementById(`preview-${i}`);
+                            if (el) el.scrollIntoView({ behavior: "smooth" });
+                          }}
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3.5 w-3.5 mr-1" />
+                          View
                         </Button>
                         <Button
                           size="icon"
@@ -270,6 +274,9 @@ function PatientRecords() {
                           <Download className="h-4 w-4" />
                         </Button>
                       </>
+                    )}
+                    {!isRealCid(r.ipfsHash) && (
+                      <span className="text-xs text-muted-foreground italic">No file</span>
                     )}
                   </div>
                 </TableCell>
@@ -298,7 +305,7 @@ function PatientRecords() {
         <div className="mt-4 space-y-4">
           {records.map((r, i) =>
             r.previewUrl ? (
-              <Card key={i} className="glass p-4">
+              <Card key={i} id={`preview-${i}`} className="glass p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-semibold text-sm">{r.recordType} — Decrypted Preview</h2>
                   <Button
@@ -329,7 +336,15 @@ function PatientRecords() {
                     className="max-w-full rounded-lg border border-border"
                   />
                 ) : (
-                  <p className="text-sm text-muted-foreground">Use Download to save this file.</p>
+                  <div className="text-center py-6">
+                    <p className="text-sm text-muted-foreground mb-3">
+                      File decrypted successfully. Click Download to save it.
+                    </p>
+                    <Button onClick={() => handleDownload(records.indexOf(r))}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download File
+                    </Button>
+                  </div>
                 )}
               </Card>
             ) : null,
@@ -356,7 +371,7 @@ function PatientRecords() {
               className="font-mono text-xs"
             />
             <p className="text-xs text-muted-foreground">
-              The patient can find this key in their record's Share dialog.
+              The patient can find this key by clicking the 🔑 key icon on their My Records page.
             </p>
           </div>
           <DialogFooter>

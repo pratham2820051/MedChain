@@ -110,7 +110,7 @@ function UploadPage() {
       setProgress(80);
 
       // ── Step 4: Save to local store ───────────────────────────────────────
-      await mockUpload({
+      const recordId = await mockUpload({
         name,
         type,
         fileName: file.name,
@@ -119,6 +119,13 @@ function UploadPage() {
         ipfsGatewayUrl,
         isEncrypted: true,
       });
+
+      // Re-save the AES key under the real record ID (mockUpload generates its own ID)
+      const { saveKey, getKey } = await import("@/services/encryptionService");
+      const existingKey = getKey(tempId);
+      if (existingKey) {
+        saveKey(recordId, existingKey);
+      }
 
       setProgress(85);
 

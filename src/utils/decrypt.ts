@@ -64,7 +64,8 @@ export function decryptToBlob(
   mimeType = "application/octet-stream",
 ): Blob {
   const bytes = decryptFile(encryptedData, aesKey);
-  return new Blob([bytes.buffer as ArrayBuffer], { type: mimeType });
+  // Use slice to get exact bytes without ArrayBuffer padding
+  return new Blob([bytes.slice(0, bytes.byteLength)], { type: mimeType });
 }
 
 /**
