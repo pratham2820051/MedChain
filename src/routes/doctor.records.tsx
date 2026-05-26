@@ -56,6 +56,7 @@ function PatientRecords() {
   const [decryptOpen, setDecryptOpen] = useState(false);
   const [decryptIndex, setDecryptIndex] = useState<number | null>(null);
   const [aesKeyInput, setAesKeyInput] = useState("");
+  const [fileExtInput, setFileExtInput] = useState("pdf");
   const [decrypting, setDecrypting] = useState(false);
 
   const handleFetch = async (e: React.FormEvent) => {
@@ -98,6 +99,7 @@ function PatientRecords() {
   const openDecryptDialog = (index: number) => {
     setDecryptIndex(index);
     setAesKeyInput("");
+    setFileExtInput("pdf");
     setDecryptOpen(true);
   };
 
@@ -116,17 +118,8 @@ function PatientRecords() {
     setDecrypting(true);
     try {
       const gatewayUrl = buildGatewayUrl(record.ipfsHash);
-      // Use record type to hint the file extension for MIME detection
-      const typeToExt: Record<string, string> = {
-        "Lab Report": "pdf",
-        "Prescription": "pdf",
-        "Scan": "jpg",
-        "X-Ray": "jpg",
-        "MRI": "jpg",
-        "Other": "pdf",
-      };
-      const ext = typeToExt[record.recordType] ?? "pdf";
-      const fileName = `record-${decryptIndex + 1}.${ext}`;
+      // Use user-provided extension for correct MIME detection
+      const fileName = `record-${decryptIndex + 1}.${fileExtInput || "pdf"}`;
       const { objectUrl, mimeType } = await decryptWithKey(
         gatewayUrl,
         aesKeyInput.trim(),
@@ -378,16 +371,32 @@ function PatientRecords() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <Label htmlFor="aes-key">AES Decryption Key</Label>
-            <Input
-              id="aes-key"
-              value={aesKeyInput}
-              onChange={(e) => setAesKeyInput(e.target.value)}
-              placeholder="64-character hex key…"
-              className="font-mono text-xs"
-            />
+            <div>
+              <Label htmlFor="aes-key">AES Decryption Key</Label>
+              <Input
+                id="aes-key"
+                value={aesKeyInput}
+                onChange={(e) => setAesKeyInput(e.target.value)}
+                placeholder="64-character hex key…"
+                className="font-mono text-xs mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="file-ext">File Type</Label>
+              <select
+                id="file-ext"
+                value={fileExtInput}
+                onChange={(e) => setFileExtInput(e.target.value)}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="pdf">PDF</option>
+                <option value="png">PNG</option>
+                <option value="jpg">JPG / JPEG</option>
+                <option value="docx">DOCX</option>
+              </select>
+            </div>
             <p className="text-xs text-muted-foreground">
-              The patient can find this key by clicking the 🔑 key icon on their My Records page.
+              The patient can find the key by clicking the 🔑 icon on their My Records page.
             </p>
           </div>
           <DialogFooter>
