@@ -120,13 +120,23 @@ export async function decryptFromIPFS(
     throw new Error("Unable to decrypt record — encryption key not found on this device.");
   }
 
-  // Download encrypted file from IPFS
   const response = await fetch(gatewayUrl);
   if (!response.ok) {
     throw new Error(`Failed to fetch encrypted file from IPFS (HTTP ${response.status}).`);
   }
 
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.includes("text/html")) {
+    throw new Error("IPFS gateway returned an error page. Try again later.");
+  }
+
   const encryptedData = await response.text();
+
+  if (!encryptedData.includes(":") || encryptedData.length < 50) {
+    throw new Error(
+      "Invalid encrypted data — this record may have been uploaded with an older version. Please re-upload the file.",
+    );
+  }
 
   // Detect MIME type from original file name
   const mimeType = getMimeType(originalName);
@@ -151,7 +161,21 @@ export async function decryptWithKey(
     throw new Error(`Failed to fetch encrypted file from IPFS (HTTP ${response.status}).`);
   }
 
+  const contentType = response.headers.get("content-type") ?? "";
+  // If gateway returns HTML (error page), reject it
+  if (contentType.includes("text/html")) {
+    throw new Error("IPFS gateway returned an error page. Try again later.");
+  }
+
   const encryptedData = await response.text();
+
+  // Validate it looks like our encrypted format: <32-char hex>:<base64>
+  if (!encryptedData.includes(":") || encryptedData.length < 50) {
+    throw new Error(
+      "Invalid encrypted data — this record may have been uploaded with an older version. Please re-upload the file.",
+    );
+  }
+
   const mimeType = getMimeType(originalName);
   const blob = decryptToBlob(encryptedData, aesKey, mimeType);
   const objectUrl = URL.createObjectURL(blob);
