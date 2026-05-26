@@ -16,16 +16,10 @@ import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { uploadRecord as mockUpload, type RecordType } from "@/lib/mock-store";
 import { uploadRecord as chainUpload, parseContractError } from "@/services/medchainService";
-import {
-  uploadToIPFS,
-  validateFile,
-  ALLOWED_EXTENSIONS,
-  MAX_FILE_SIZE_BYTES,
-} from "@/services/ipfsService";
-import { encryptMedicalFile } from "@/services/encryptionService";
+import { uploadToIPFS, validateFile, ALLOWED_EXTENSIONS, MAX_FILE_SIZE_BYTES } from "@/services/ipfsService";
 import { useWallet } from "@/hooks/useWallet";
 import { toast } from "sonner";
-import { UploadCloud, Loader2, FileCheck2, Link2, ShieldCheck } from "lucide-react";
+import { UploadCloud, Loader2, FileCheck2, Link2 } from "lucide-react";
 
 export const Route = createFileRoute("/patient/upload")({
   head: () => ({ meta: [{ title: "Upload Record — MedChain" }] }),
@@ -34,13 +28,12 @@ export const Route = createFileRoute("/patient/upload")({
 
 const types: RecordType[] = ["Lab Report", "Prescription", "Scan", "X-Ray", "MRI", "Other"];
 
-type UploadStep = "idle" | "validating" | "encrypting" | "ipfs" | "blockchain" | "done";
+type UploadStep = "idle" | "validating" | "ipfs" | "blockchain" | "done";
 
 const STEP_LABELS: Record<UploadStep, string> = {
   idle: "",
   validating: "Validating file…",
-  encrypting: "Encrypting file with AES-256…",
-  ipfs: "Uploading encrypted file to IPFS…",
+  ipfs: "Uploading file to IPFS…",
   blockchain: "Saving CID to blockchain…",
   done: "Upload complete!",
 };
@@ -72,64 +65,41 @@ function UploadPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !name) {
-      toast.error("Please provide a name and file.");
-      return;
-    }
+    if (!file || !name) { toast.error("Please provide a name and file."); return; }
 
     setBusy(true);
     setProgress(0);
     setCid(null);
 
-    // Generate a temp record ID for key storage
-    const tempId = "r" + Math.random().toString(36).slice(2, 8);
-
     try {
-      // ── Step 1: Validate ──────────────────────────────────────────────────
+      // Step 1: Validate
       setStep("validating");
       validateFile(file);
-      setProgress(5);
+      setProgress(10);
 
-      // ── Step 2: Encrypt ───────────────────────────────────────────────────
-      setStep("encrypting");
-      const { encryptedFile } = await encryptMedicalFile(file, tempId);
-      setProgress(30);
-      toast.success("File encrypted with AES-256 ✓");
-
-      let ipfsCid = "QmDummyCID123";
-      let ipfsGatewayUrl = "";
+      // Step 2: Upload original file directly to IPFS
       setStep("ipfs");
-      const ipfsResult = await uploadToIPFS(encryptedFile, `${name} [encrypted]`, (pct) => {
-        setProgress(30 + Math.round(pct * 0.45));
+      const ipfsResult = await uploadToIPFS(file, name, (pct) => {
+        setProgress(10 + Math.round(pct * 0.7));
       });
-      ipfsCid = ipfsResult.cid;
-      ipfsGatewayUrl = ipfsResult.gatewayUrl;
+      const ipfsCid = ipfsResult.cid;
+      const ipfsGatewayUrl = ipfsResult.gatewayUrl;
       setCid(ipfsCid);
-      toast.success(`Encrypted file pinned to IPFS ✓`);
+      toast.success(`File uploaded to IPFS ✓`);
+      setProgress(85);
 
-      setProgress(80);
-
-      // ── Step 4: Save to local store ───────────────────────────────────────
-      const recordId = await mockUpload({
+      // Step 3: Save to local store
+      await mockUpload({
         name,
         type,
         fileName: file.name,
         description: desc,
         ipfsCid,
         ipfsGatewayUrl,
-        isEncrypted: true,
+        isEncrypted: false,
       });
 
-      // Re-save the AES key under the real record ID (mockUpload generates its own ID)
-      const { saveKey, getKey } = await import("@/services/encryptionService");
-      const existingKey = getKey(tempId);
-      if (existingKey) {
-        saveKey(recordId, existingKey);
-      }
-
-      setProgress(85);
-
-      // ── Step 5: Save CID to blockchain ────────────────────────────────────
+      // Step 4: Save CID to blockchain
       if (isConnected && isCorrectNetwork) {
         setStep("blockchain");
         await chainUpload(type, ipfsCid);
@@ -155,29 +125,20 @@ function UploadPage() {
     <div className="max-w-2xl">
       <PageHeader
         title="Upload Medical Record"
-        description="Files are AES-256 encrypted before being stored on IPFS."
+        description="Upload your medical file to IPFS and save the reference on blockchain."
       />
       <Card className="glass p-6">
         <form onSubmit={submit} className="space-y-5">
-          {/* Encryption badge */}
-          <div className="flex items-center gap-2 rounded-xl bg-accent/10 border border-accent/30 px-3 py-2 text-xs text-accent-foreground">
-            <ShieldCheck className="h-4 w-4 text-accent shrink-0" />
-            <span>Files are encrypted with AES-256 before upload. Only you can decrypt them.</span>
-          </div>
 
           {/* File drop zone */}
           <div>
             <Label>Medical File</Label>
-            <label
-              className={`mt-1 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 cursor-pointer transition ${file ? "border-primary bg-primary/5" : "border-border bg-secondary/30 hover:bg-secondary/50"}`}
-            >
+            <label className={`mt-1 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 cursor-pointer transition ${file ? "border-primary bg-primary/5" : "border-border bg-secondary/30 hover:bg-secondary/50"}`}>
               {file ? (
                 <>
                   <FileCheck2 className="h-7 w-7 text-primary" />
                   <span className="text-sm font-medium text-primary">{file.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {fileSizeMB} MB · Click to change
-                  </span>
+                  <span className="text-xs text-muted-foreground">{fileSizeMB} MB · Click to change</span>
                 </>
               ) : (
                 <>
@@ -188,41 +149,22 @@ function UploadPage() {
                   </span>
                 </>
               )}
-              <input
-                type="file"
-                className="hidden"
-                accept=".pdf,.png,.jpg,.jpeg,.docx"
-                onChange={handleFileChange}
-              />
+              <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg,.docx" onChange={handleFileChange} />
             </label>
           </div>
 
           {/* Record name */}
           <div>
             <Label htmlFor="name">Record Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Annual Blood Panel"
-              required
-            />
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Annual Blood Panel" required />
           </div>
 
           {/* Record type */}
           <div>
             <Label>Record Type</Label>
             <Select value={type} onValueChange={(v) => setType(v as RecordType)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {types.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{types.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
 
@@ -235,19 +177,13 @@ function UploadPage() {
           {/* Network status */}
           <div className="space-y-1">
             {isConnected && isCorrectNetwork && (
-              <p className="text-xs text-muted-foreground">
-                ✅ MetaMask on Sepolia — CID will be saved on-chain.
-              </p>
+              <p className="text-xs text-muted-foreground">✅ MetaMask on Sepolia — CID will be saved on-chain.</p>
             )}
             {isConnected && !isCorrectNetwork && (
-              <p className="text-xs text-yellow-600 dark:text-yellow-400">
-                ⚠️ Wrong network — switch to Sepolia.
-              </p>
+              <p className="text-xs text-yellow-600 dark:text-yellow-400">⚠️ Wrong network — switch to Sepolia.</p>
             )}
             {!isConnected && (
-              <p className="text-xs text-muted-foreground">
-                Connect MetaMask on Sepolia to save CID on-chain.
-              </p>
+              <p className="text-xs text-muted-foreground">Connect MetaMask on Sepolia to save CID on-chain.</p>
             )}
           </div>
 
@@ -260,13 +196,11 @@ function UploadPage() {
           )}
 
           {/* CID result */}
-          {cid && cid !== "QmDummyCID123" && (
+          {cid && (
             <div className="rounded-xl border border-accent/40 bg-accent/10 p-3 flex items-start gap-2 text-xs">
               <Link2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
               <div>
-                <div className="font-medium text-accent-foreground">
-                  Encrypted file pinned to IPFS
-                </div>
+                <div className="font-medium text-accent-foreground">File pinned to IPFS</div>
                 <div className="font-mono text-muted-foreground break-all mt-0.5">{cid}</div>
               </div>
             </div>
@@ -274,23 +208,11 @@ function UploadPage() {
 
           {/* Actions */}
           <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate({ to: "/patient/dashboard" })}
-              disabled={busy}
-            >
-              Cancel
-            </Button>
+            <Button type="button" variant="outline" onClick={() => navigate({ to: "/patient/dashboard" })} disabled={busy}>Cancel</Button>
             <Button type="submit" disabled={busy} className="bg-hero text-primary-foreground">
               {busy ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {STEP_LABELS[step] || "Uploading…"}
-                </>
-              ) : (
-                "Encrypt & Upload"
-              )}
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{STEP_LABELS[step] || "Uploading…"}</>
+              ) : "Upload Record"}
             </Button>
           </div>
         </form>
